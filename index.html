@@ -131,9 +131,6 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
 </head>
 <body>
 
-<!-- ============================================================
-     ЭКРАН ВХОДА / РЕГИСТРАЦИИ
-     ============================================================ -->
 <div class="app">
   <div id="screen-auth" class="screen">
     <div style="text-align:center;padding:40px 0 20px">
@@ -141,13 +138,10 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
       <h1 style="margin-top:12px">FitLife</h1>
       <p class="subtitle">Твой персональный фитнес-помощник</p>
     </div>
-
     <div class="auth-tabs">
       <button id="tab-login" class="active" onclick="showAuth('login')">Вход</button>
       <button id="tab-register" onclick="showAuth('register')">Регистрация</button>
     </div>
-
-    <!-- Форма входа -->
     <div id="auth-login" class="card">
       <h2>Вход в аккаунт</h2>
       <div class="field"><label>Email</label>
@@ -168,8 +162,6 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
         Войти через Google
       </button>
     </div>
-
-    <!-- Форма регистрации -->
     <div id="auth-register" class="card hidden">
       <h2>Создать аккаунт</h2>
       <div class="field"><label>Имя</label>
@@ -193,17 +185,13 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
         Регистрация через Google
       </button>
     </div>
-
     <div class="card">
       <p style="font-size:13px;color:var(--text-dim);line-height:1.6">
-        🔒 Твои данные хранятся локально и синхронизируются в облаке Firebase. Мы не передаём их третьим лицам.
+        🔒 Твои данные хранятся локально и синхронизируются в облаке Firebase.
       </p>
     </div>
   </div>
 
-  <!-- ============================================================
-       ОНБОРДИНГ
-       ============================================================ -->
   <div id="screen-onboarding" class="screen">
     <div class="progress-bar"><div id="ob-progress" style="width:20%"></div></div>
     <div class="card" id="ob-step-1">
@@ -262,9 +250,6 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
     </div>
   </div>
 
-  <!-- ============================================================
-       DASHBOARD
-       ============================================================ -->
   <div id="screen-dashboard" class="screen">
     <h1 id="dash-greeting">Привет!</h1>
     <p class="subtitle" id="dash-sub">Твоя норма на сегодня</p>
@@ -302,9 +287,6 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
     </div>
   </div>
 
-  <!-- ============================================================
-       РАЦИОН
-       ============================================================ -->
   <div id="screen-nutrition" class="screen">
     <h1>Рацион на сегодня 🍽️</h1>
     <p class="subtitle">Пересчитывается автоматически</p>
@@ -318,9 +300,6 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
     <button class="btn ghost" onclick="showScreen('dashboard')">← На главную</button>
   </div>
 
-  <!-- ============================================================
-       РЕЦЕПТЫ
-       ============================================================ -->
   <div id="screen-recipes" class="screen">
     <h1>Все рецепты 📖</h1>
     <p class="subtitle">С пропорциями и пошаговой готовкой</p>
@@ -334,9 +313,6 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
     <button class="btn ghost" onclick="showScreen('recipes')">← К рецептам</button>
   </div>
 
-  <!-- ============================================================
-       ТРЕНИРОВКИ
-       ============================================================ -->
   <div id="screen-workout" class="screen">
     <h1>Тренировки 🏃</h1>
     <p class="subtitle" id="workout-sub">Программа подбирается автоматически</p>
@@ -351,9 +327,6 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
     <button class="btn ghost" onclick="showScreen('dashboard')">← На главную</button>
   </div>
 
-  <!-- ============================================================
-       УПРАЖНЕНИЯ
-       ============================================================ -->
   <div id="screen-exercises" class="screen">
     <h1>Все упражнения 💪</h1>
     <p class="subtitle">Дом, улица, зал</p>
@@ -362,9 +335,6 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
     <button class="btn ghost" onclick="showScreen('dashboard')">← На главную</button>
   </div>
 
-  <!-- ============================================================
-       ЗАМЕРЫ
-       ============================================================ -->
   <div id="screen-measure" class="screen">
     <h1>Замеры тела 📏</h1>
     <p class="subtitle">При сохранении норма пересчитается</p>
@@ -380,9 +350,6 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
     <button class="btn ghost" onclick="showScreen('dashboard')">← На главную</button>
   </div>
 
-  <!-- ============================================================
-       ПОИСК ПРОДУКТОВ
-       ============================================================ -->
   <div id="screen-search" class="screen">
     <h1>Поиск продуктов 🔍</h1>
     <p class="subtitle">Вердикт обновляется автоматически</p>
@@ -412,19 +379,14 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
     <button class="btn ghost" onclick="showScreen('dashboard')">← На главную</button>
   </div>
 
-  <!-- ============================================================
-       КОНСТРУКТОР БЛЮД
-       ============================================================ -->
   <div id="screen-meal-builder" class="screen">
     <h1>Конструктор блюд 🍽️</h1>
     <p class="subtitle">Собери своё блюдо из продуктов — КБЖУ посчитается автоматически</p>
-
     <div class="card">
       <h2>Название блюда</h2>
       <div class="field">
         <input type="text" id="mb-name" placeholder="Например: Мой протеиновый завтрак" maxlength="60">
       </div>
-
       <h2 style="margin-top:20px">Добавить ингредиент</h2>
       <div class="field">
         <label>Продукт</label>
@@ -436,12 +398,10 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
       </div>
       <button class="btn" onclick="addIngredientToMeal()">➕ Добавить в блюдо</button>
     </div>
-
     <div class="card">
       <h2>Состав блюда</h2>
       <div id="mb-items"></div>
     </div>
-
     <div class="card">
       <h2>Итого КБЖУ</h2>
       <div class="macros four">
@@ -453,15 +413,11 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
       <div style="height:16px"></div>
       <button class="btn" onclick="saveCustomMeal()">💾 Сохранить блюдо</button>
     </div>
-
     <button class="btn ghost" onclick="showScreen('my-meals')">📌 Мои блюда</button>
     <div style="height:10px"></div>
     <button class="btn ghost" onclick="showScreen('dashboard')">← На главную</button>
   </div>
 
-  <!-- ============================================================
-       МОИ БЛЮДА
-       ============================================================ -->
   <div id="screen-my-meals" class="screen">
     <h1>Мои блюда 📌</h1>
     <p class="subtitle">Твои собственные рецепты с точным КБЖУ</p>
@@ -472,21 +428,24 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
     <button class="btn ghost" onclick="showScreen('dashboard')">← На главную</button>
   </div>
 
-  <!-- ============================================================
-       ПРОФИЛЬ
-       ============================================================ -->
   <div id="screen-profile" class="screen">
     <h1>Профиль ⚙️</h1>
     <p class="subtitle">Меняешь — всё пересчитывается</p>
     <div class="card"><h2>Твои данные</h2><div id="profile-info"></div>
       <div style="height:10px"></div><button class="btn secondary" onclick="editProfile()">✏️ Изменить</button>
     </div>
+
     <div class="card"><h2>📱 Приложение</h2>
       <p style="font-size:13px;color:var(--text-dim);line-height:1.6;margin-bottom:12px">
         Установи FitLife на телефон, чтобы открывать без браузера, как обычное приложение.
       </p>
-      <button class="btn" onclick="installApp()" id="install-btn">📲 Установить приложение</button>
+      <button class="btn" onclick="installApp()" id="install-btn">📲 Установить на iPhone / ПК</button>
+      <div style="height:10px"></div>
+      <a href="fitlife.apk" download style="text-decoration:none">
+        <button class="btn secondary">📥 Скачать для Android (.apk)</button>
+      </a>
     </div>
+
     <div class="card"><h2>Данные</h2>
       <button class="btn secondary" onclick="exportData()">📤 Экспорт (JSON)</button>
       <div style="height:10px"></div>
@@ -495,11 +454,13 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
       <div style="height:10px"></div>
       <button class="btn secondary" onclick="toggleTheme()">🌓 Сменить тему</button>
     </div>
+
     <div class="card"><h2>Аккаунт</h2>
       <button class="btn danger" onclick="doLogout()">🚪 Выйти из аккаунта</button>
       <div style="height:10px"></div>
       <button class="btn ghost" onclick="resetAll()">🗑️ Сбросить локальные данные</button>
     </div>
+
     <div class="card"><h2>⚠️ Важно</h2>
       <p style="font-size:13px;color:var(--text-dim);line-height:1.6">
         Если тебе меньше 18 лет — обязательно проконсультируйся с врачом. Сайт — помощник, а не медицинский совет.
@@ -510,9 +471,6 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
 
 </div>
 
-<!-- ============================================================
-     НАВИГАЦИЯ
-     ============================================================ -->
 <div class="nav hidden" id="nav">
   <button data-screen="dashboard" onclick="showScreen('dashboard')"><span class="ic">🏠</span>Главная</button>
   <button data-screen="nutrition" onclick="showScreen('nutrition')"><span class="ic">🍽️</span>Рацион</button>
@@ -526,9 +484,6 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
   <button data-screen="profile" onclick="showScreen('profile')"><span class="ic">⚙️</span>Профиль</button>
 </div>
 
-<!-- ============================================================
-     INSTALL BANNER
-     ============================================================ -->
 <div class="install-banner" id="install-banner">
   <div class="txt">📲 Установить FitLife на телефон?</div>
   <button onclick="installApp()">Установить</button>
@@ -537,10 +492,6 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
 
 <div class="toast" id="toast"></div>
 
-<!-- ============================================================
-     ПОДКЛЮЧЕНИЕ СКРИПТОВ
-     Порядок важен: data.js → firebase.js (module) → app.js (module)
-     ============================================================ -->
 <script src="data.js"></script>
 <script type="module" src="app.js"></script>
 <script>
@@ -553,5 +504,6 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
     });
   }
 </script>
+
 </body>
 </html>
