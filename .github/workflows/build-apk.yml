@@ -1,0 +1,50 @@
+name: Build APK from AAB
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '*.aab'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Download bundletool
+        run: |
+          wget https://github.com/google/bundletool/releases/download/1.18.1/bundletool-all-1.18.1.jar
+
+      - name: Find AAB file
+        id: findaab
+        run: |
+          AAB_FILE=$(find . -maxdepth 1 -name "*.aab" | head -1)
+          echo "Found: $AAB_FILE"
+          echo "aab=$AAB_FILE" >> $GITHUB_OUTPUT
+
+      - name: Build APKs
+        run: |
+          java -jar bundletool-all-1.18.1.jar build-apks \
+            --bundle=${{ steps.findaab.outputs.aab }} \
+            --output=fitlife.apks \
+            --mode=universal
+
+      - name: Extract universal APK
+        run: |
+          mkdir -p output
+          unzip fitlife.apks -d output
+          mv output/universal.apk FitLife.apk
+
+      - name: Upload APK as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: FitLife-APK
+          path: FitLife.apk
