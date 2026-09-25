@@ -1,14 +1,11 @@
 /* ============================================================
-   FitLife — основная логика
-   Версия: 2.0
+   FitLife — основная логика (v2.0 — mobile)
    Файл: app.js
-   
-   Требует: data.js + firebase.js
    ============================================================ */
 
 import {
   registerUser, loginUser, loginWithGoogle, logoutUser,
-  onAuthChange, getCurrentUser,
+  onAuthChange, getCurrentUser, checkRedirectResult,
   saveProfileToCloud, loadProfileFromCloud,
   saveMeasurementToCloud, loadMeasurementsFromCloud, deleteMeasurementFromCloud,
   saveCustomMealToCloud, loadCustomMealsFromCloud, deleteCustomMealFromCloud,
@@ -20,19 +17,18 @@ import {
    1. СОСТОЯНИЕ
    ============================================================ */
 let state = {
-  user: null,          // профиль пользователя (локальный)
-  fbUser: null,        // Firebase user
-  norm: null,          // норма КБЖУ
+  user: null,
+  fbUser: null,
+  norm: null,
   measurements: [],
-  customMeals: [],     // СВОИ блюда из конструктора
+  customMeals: [],
   workoutLog: {},
   theme: "dark",
   planSeed: 0,
   recipeFilter: "all",
   exerciseFilter: "all",
   searchCat: "all",
-  currentMeal: null,   // блюдо, которое редактируется в конструкторе
-  currentMealItems: [] // ингредиенты текущего блюда
+  currentMealItems: []
 };
 
 function saveLocal() {
@@ -51,10 +47,7 @@ function saveLocal() {
 function loadLocal() {
   try {
     const raw = localStorage.getItem("fitlife_state");
-    if (raw) {
-      const d = JSON.parse(raw);
-      state = { ...state, ...d };
-    }
+    if (raw) state = { ...state, ...JSON.parse(raw) };
   } catch (e) { console.warn("loadLocal error:", e); }
 }
 
@@ -76,7 +69,6 @@ function showScreen(name) {
   document.querySelectorAll(".nav button").forEach(b =>
     b.classList.toggle("active", b.dataset.screen === name)
   );
-  // Автообновление при показе экрана
   if (name === "dashboard") renderDashboard();
   if (name === "nutrition") generateMealPlan();
   if (name === "workout") renderWorkout();
@@ -125,18 +117,6 @@ function calcNorm(user) {
   return { cal: Math.round(cal), p: protein, f: fat, c: Math.max(carb, 50) };
 }
 
-function recalcAll() {
-  if (!state.user) return;
-  state.norm = calcNorm(state.user);
-  const active = document.querySelector(".screen.active");
-  if (!active) return;
-  const id = active.id;
-  if (id === "screen-dashboard") renderDashboard();
-  if (id === "screen-nutrition") generateMealPlan();
-  if (id === "screen-workout") renderWorkout();
-  if (id === "screen-profile") renderProfile();
-}
-
 /* ============================================================
    4. ОНБОРДИНГ
    ============================================================ */
@@ -166,11 +146,8 @@ window.finishOnboarding = async function () {
   state.user = { name, sex, age, height, weight, goal, activity, place };
   state.norm = calcNorm(state.user);
   saveLocal();
-  // Синхронизация с облаком
   const u = getCurrentUser();
-  if (u) {
-    await saveProfileToCloud(u.uid, state.user);
-  }
+  if (u) await saveProfileToCloud(u.uid, state.user);
   document.getElementById("nav").classList.remove("hidden");
   showScreen("dashboard");
   toast("Профиль создан! 🚀", "ok");
@@ -446,7 +423,6 @@ window.markWorkout = function (idx) {
   if (u) saveWorkoutLogToCloud(u.uid, state.workoutLog);
 };
 
-/* Таймер планки */
 let timerInt = null, timerSec = 0, timerRun = false;
 window.toggleTimer = function () {
   const b = document.getElementById("timer-start");
@@ -540,7 +516,6 @@ window.saveMeasurement = async function () {
   state.user.weight = w;
   state.norm = calcNorm(state.user);
   saveLocal();
-  // Синхронизация
   const u = getCurrentUser();
   if (u) {
     await saveMeasurementToCloud(u.uid, m);
@@ -574,7 +549,7 @@ function renderMeasurements() {
 }
 
 /* ============================================================
-   11. ПОИСК ПРОДУКТОВ
+   11. ПОИСК
    ============================================================ */
 function initSearch() {
   const sel = document.getElementById("photo-product-select");
@@ -831,7 +806,6 @@ window.saveCustomMeal = async function () {
     const res = await saveCustomMealToCloud(u.uid, meal);
     if (res.ok) meal.id = res.id;
   }
-  // Сброс формы
   state.currentMealItems = [];
   document.getElementById("mb-name").value = "";
   renderMealBuilder();
@@ -952,6 +926,8 @@ function applyTheme() {
 window.showAuth = function (mode) {
   document.getElementById("auth-login").classList.toggle("hidden", mode !== "login");
   document.getElementById("auth-register").classList.toggle("hidden", mode !== "register");
+  document.getElementById("tab-login").classList.toggle("active", mode === "login");
+  document.getElementById("tab-register").classList.toggle("active", mode === "register");
 };
 
 window.doRegister = async function () {
@@ -981,7 +957,7 @@ window.doGoogleLogin = async function () {
   toast("Открываю Google...");
   const res = await loginWithGoogle();
   if (!res.ok) return toast(res.error, "bad");
-  toast("Добро пожаловать! 👋", "ok");
+  // Если redirect — браузер сам уйдёт на google.com, потом вернётся
 };
 
 window.doLogout = async function () {
@@ -1010,7 +986,6 @@ async function afterLogin(fbUser) {
     document.getElementById("nav").classList.remove("hidden");
     showScreen("dashboard");
   } else {
-    // Нет профиля — на онбординг
     document.getElementById("screen-onboarding").classList.add("active");
   }
 }
@@ -1052,9 +1027,9 @@ window.installApp = function () {
   } else {
     const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
     if (isIOS) {
-      alert("📲 Установка на iPhone/iPad:\n\n1. Нажми кнопку «Поделиться» (квадрат со стрелкой) в Safari\n2. Пролистай и выбери «На экран Домой»\n3. Нажми «Добавить»\n\nГотово!");
+      alert("📲 Установка на iPhone:\n\n1. Нажми «Поделиться» (квадрат со стрелкой) в Safari\n2. Пролистай и выбери «На экран Домой»\n3. Нажми «Добавить»");
     } else {
-      alert("📲 Установка приложения:\n\n1. Открой меню браузера (⋮)\n2. Выбери «Установить приложение» или «Добавить на главный экран»\n3. Подтверди");
+      alert("📲 Установка:\n\n1. Открой меню браузера (⋮)\n2. Выбери «Установить приложение» или «Добавить на главный экран»\n3. Подтверди");
     }
   }
 };
@@ -1067,31 +1042,33 @@ window.dismissInstall = function () {
 /* ============================================================
    17. ИНИЦИАЛИЗАЦИЯ
    ============================================================ */
-function init() {
+async function init() {
   loadLocal();
   applyTheme();
 
-  // Автотема
   if (!localStorage.getItem("fitlife_state")) {
     const d = window.matchMedia("(prefers-color-scheme: dark)").matches;
     state.theme = d ? "dark" : "light";
     applyTheme();
   }
 
-  // Заполнение селекта продуктов в конструкторе
   const mbSel = document.getElementById("mb-product-select");
   if (mbSel) {
     mbSel.innerHTML = PRODUCTS.map(p => `<option value="${p.name}">${p.name}</option>`).join("");
   }
 
-  // Подписка на Firebase Auth
+  // Проверяем, не вернулись ли мы с редиректа Google
+  const redirectRes = await checkRedirectResult();
+  if (redirectRes.ok && redirectRes.user) {
+    toast("Добро пожаловать! 👋", "ok");
+  }
+
   onAuthChange(user => {
     if (user) {
       afterLogin(user);
     } else {
       state.fbUser = null;
       if (state.user) {
-        // Есть локальный профиль, но нет облака — работаем офлайн
         document.getElementById("nav").classList.remove("hidden");
         showScreen("dashboard");
       } else {
@@ -1110,12 +1087,9 @@ function init() {
   if (si) si.addEventListener("keydown", e => { if (e.key === "Enter") searchProduct(); });
 }
 
-/* ============================================================
-   18. ЭКСПОРТ
-   ============================================================ */
 window.showScreen = showScreen;
 window.toast = toast;
 
 document.addEventListener("DOMContentLoaded", init);
 
-console.log("✅ app.js загружен");
+console.log("✅ app.js (mobile) загружен");
