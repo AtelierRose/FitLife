@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>FitLife — Генератор иконок</title>
+<style>
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: #0f0f1a; color: #eaeaf0;
+    display: flex; align-items: center; justify-content: center;
+    min-height: 100vh; margin: 0; padding: 20px;
+  }
+  .box {
+    background: #1a1a2e; padding: 40px; border-radius: 20px;
+    max-width: 500px; width: 100%; text-align: center;
+    box-shadow: 0 20px 60px rgba(0,0,0,.5);
+  }
+  h1 { margin: 0 0 8px; font-size: 24px; }
+  p { color: #8a8aa0; margin-bottom: 24px; font-size: 14px; line-height: 1.6; }
+  .preview {
+    display: flex; gap: 16px; justify-content: center; margin: 24px 0;
+  }
+  .preview img {
+    border-radius: 16px; box-shadow: 0 8px 20px rgba(108,92,231,.3);
+  }
+  button {
+    background: #6c5ce7; color: #fff; border: none;
+    padding: 16px 32px; border-radius: 14px; font-size: 16px;
+    font-weight: 700; cursor: pointer; font-family: inherit;
+    width: 100%; transition: transform .2s;
+  }
+  button:hover { transform: translateY(-2px); }
+  button:active { transform: scale(.98); }
+  button.secondary {
+    background: #22223a; color: #eaeaf0; margin-top: 10px;
+  }
+  .status {
+    margin-top: 16px; font-size: 13px; color: #00d2a8;
+    min-height: 20px;
+  }
+</style>
+</head>
+<body>
+  <div class="box">
+    <h1>🎨 Иконки FitLife</h1>
+    <p>Нажми кнопку — браузер скачает 3 файла. Потом положи их в папку <b>icons/</b> рядом с index.html</p>
+
+    <div class="preview">
+      <img id="preview-192" width="96" height="96" alt="192">
+      <img id="preview-512" width="96" height="96" alt="512">
+    </div>
+
+    <button onclick="downloadAll()">⬇️ Скачать все иконки</button>
+    <button class="secondary" onclick="downloadFavicon()">Скачать только favicon.svg</button>
+
+    <div class="status" id="status"></div>
+  </div>
+
+<script>
+/* ============================================================
+   Рисуем иконку FitLife на Canvas
+   ============================================================ */
+function drawIcon(size) {
+  const c = document.createElement("canvas");
+  c.width = size;
+  c.height = size;
+  const ctx = c.getContext("2d");
+
+  // Фон — фиолетовый градиент
+  const grd = ctx.createLinearGradient(0, 0, size, size);
+  grd.addColorStop(0, "#6c5ce7");
+  grd.addColorStop(1, "#00d2a8");
+  ctx.fillStyle = grd;
+  ctx.fillRect(0, 0, size, size);
+
+  // Скругление — маска
+  ctx.globalCompositeOperation = "destination-in";
+  const r = size * 0.22;
+  ctx.beginPath();
+  ctx.moveTo(r, 0);
+  ctx.lineTo(size - r, 0);
+  ctx.quadraticCurveTo(size, 0, size, r);
+  ctx.lineTo(size, size - r);
+  ctx.quadraticCurveTo(size, size, size - r, size);
+  ctx.lineTo(r, size);
+  ctx.quadraticCurveTo(0, size, 0, size - r);
+  ctx.lineTo(0, r);
+  ctx.quadraticCurveTo(0, 0, r, 0);
+  ctx.closePath();
+  ctx.fill();
+
+  // Возвращаем режим
+  ctx.globalCompositeOperation = "source-over";
+
+  // Эмодзи 💪 по центру
+  const emojiSize = size * 0.62;
+  ctx.font = `${emojiSize}px "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif`;
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.fillText("💪", size / 2, size / 2 + size * 0.04);
+
+  // Буква F внизу (мелкий бренд-штрих)
+  const fontSize = size * 0.16;
+  ctx.font = `bold ${fontSize}px -apple-system, sans-serif`;
+  ctx.fillStyle = "rgba(255,255,255,0.95)";
+  ctx.fillText("FitLife", size / 2, size * 0.87);
+
+  return c;
+}
+
+/* ============================================================
+   Скачивание
+   ============================================================ */
+function downloadCanvas(canvas, filename) {
+  return new Promise(resolve => {
+    canvas.toBlob(blob => {
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      setTimeout(() => {
+        URL.revokeObjectURL(url);
+        resolve();
+      }, 300);
+    }, "image/png");
+  });
+}
+
+async function downloadAll() {
+  const status = document.getElementById("status");
+  status.textContent = "⏳ Генерирую...";
+
+  const c192 = drawIcon(192);
+  const c512 = drawIcon(512);
+
+  await downloadCanvas(c192, "icon-192.png");
+  await new Promise(r => setTimeout(r, 600));
+  await downloadCanvas(c512, "icon-512.png");
+  await new Promise(r => setTimeout(r, 600));
+  downloadFavicon();
+
+  status.textContent = "✅ Готово! Проверь папку Загрузки → перемести в icons/";
+}
+
+/* ============================================================
+   SVG Favicon
+   ============================================================ */
+function downloadFavicon() {
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#6c5ce7"/>
+      <stop offset="100%" stop-color="#00d2a8"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="112" fill="url(#g)"/>
+  <text x="256" y="290" font-size="290" text-anchor="middle" dominant-baseline="middle">💪</text>
+  <text x="256" y="450" font-size="80" font-weight="bold" text-anchor="middle" fill="#ffffff" font-family="sans-serif">FitLife</text>
+</svg>`;
+  const blob = new Blob([svg], { type: "image/svg+xml" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "favicon.svg";
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 500);
+}
+
+/* ============================================================
+   Показываем превью сразу при открытии
+   ============================================================ */
+window.addEventListener("DOMContentLoaded", () => {
+  document.getElementById("preview-192").src = drawIcon(192).toDataURL();
+  document.getElementById("preview-512").src = drawIcon(512).toDataURL();
+});
+</script>
+</body>
+</html>

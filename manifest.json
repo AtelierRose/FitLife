@@ -1,0 +1,67 @@
+{
+  "id": "fitlife-app-v2",
+  "name": "FitLife — фитнес-помощник",
+  "short_name": "FitLife",
+  "description": "Расчёт калорий, рацион, тренировки, КБЖУ продуктов, свои блюда",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "display_override": ["standalone", "minimal-ui"],
+  "orientation": "portrait",
+  "background_color": "#0f0f1a",
+  "theme_color": "#6c5ce7",
+  "lang": "ru",
+  "dir": "ltr",
+  "categories": ["health", "fitness", "lifestyle", "food"],
+  "icons": [
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "icons/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Рацион на сегодня",
+      "short_name": "Рацион",
+      "url": "./index.html#nutrition",
+      "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Конструктор блюд",
+      "short_name": "Блюдо",
+      "url": "./index.html#meal-builder",
+      "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Поиск продуктов",
+      "short_name": "Поиск",
+      "url": "./index.html#search",
+      "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }]
+    }
+  ]
+}
