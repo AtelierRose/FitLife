@@ -543,6 +543,15 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
      ============================================================ -->
 <script src="data.js"></script>
 <script type="module" src="app.js"></script>
-
+<script>
+  // Регистрация Service Worker для PWA
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", () => {
+      navigator.serviceWorker.register("./sw.js")
+        .then(reg => console.log("✅ SW зарегистрирован:", reg.scope))
+        .catch(err => console.warn("⚠️ SW ошибка:", err));
+    });
+  }
+</script>
 </body>
 </html>
