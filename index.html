@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<meta name="theme-color" content="#6c5ce7">
+<meta name="theme-color" content="#0f0a1f">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="FitLife">
@@ -14,128 +14,1072 @@
 <link rel="apple-touch-icon" href="icons/icon-192.png">
 <title>FitLife — твой фитнес-помощник</title>
 <style>
+/* ============================================================
+   БАЗА
+   ============================================================ */
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-:root{--bg:#0f0f1a;--bg-card:#1a1a2e;--bg-card-hover:#22223a;--text:#eaeaf0;--text-dim:#8a8aa0;--accent:#6c5ce7;--accent-2:#00d2a8;--danger:#ff6b6b;--warn:#ffa94d;--ok:#51cf66;--radius:18px;--shadow:0 8px 30px rgba(0,0,0,.35);--safe-top:env(safe-area-inset-top,0px);--safe-bottom:env(safe-area-inset-bottom,0px)}
-[data-theme="light"]{--bg:#f5f6fa;--bg-card:#fff;--bg-card-hover:#f0f1f7;--text:#1a1a2e;--text-dim:#6a6a80;--shadow:0 8px 30px rgba(0,0,0,.08)}
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;transition:background .3s,color .3s;line-height:1.5;-webkit-font-smoothing:antialiased;padding-top:var(--safe-top);overscroll-behavior-y:none}
-.app{max-width:900px;margin:0 auto;padding:16px;padding-bottom:120px}
-.screen{display:none;animation:fadeIn .35s ease}
+
+:root{
+  /* Aurora палитра */
+  --aurora-1:#7c3aed;
+  --aurora-2:#ec4899;
+  --aurora-3:#06b6d4;
+  --aurora-4:#a855f7;
+
+  /* Фон */
+  --bg-base:#08060f;
+  --bg-glass:rgba(30,25,55,.55);
+  --bg-glass-hover:rgba(40,35,70,.7);
+  --bg-glass-light:rgba(255,255,255,.06);
+
+  /* Текст */
+  --text:#f5f3ff;
+  --text-dim:#a89ec9;
+  --text-mute:#6b6490;
+
+  /* Акценты */
+  --accent-1:#a855f7;
+  --accent-2:#ec4899;
+  --accent-3:#06b6d4;
+  --accent-grad:linear-gradient(135deg,#a855f7 0%,#ec4899 50%,#06b6d4 100%);
+
+  /* Статусы */
+  --danger:#f43f5e;
+  --warn:#fb923c;
+  --ok:#10b981;
+
+  --radius:24px;
+  --radius-sm:16px;
+  --shadow:0 8px 32px rgba(168,85,247,.15);
+  --shadow-hover:0 12px 48px rgba(168,85,247,.25);
+  --safe-top:env(safe-area-inset-top,0px);
+  --safe-bottom:env(safe-area-inset-bottom,0px);
+}
+
+/* Светлая тема */
+[data-theme="light"]{
+  --bg-base:#f5f3ff;
+  --bg-glass:rgba(255,255,255,.7);
+  --bg-glass-hover:rgba(255,255,255,.85);
+  --bg-glass-light:rgba(255,255,255,.5);
+  --text:#1a1333;
+  --text-dim:#6b6490;
+  --text-mute:#9d95b8;
+  --shadow:0 8px 32px rgba(168,85,247,.12);
+}
+
+/* ============================================================
+   BODY + AURORA ФОН
+   ============================================================ */
+html,body{
+  height:100%;
+  overflow-x:hidden;
+}
+
+body{
+  font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI',Roboto,sans-serif;
+  background:var(--bg-base);
+  color:var(--text);
+  min-height:100vh;
+  line-height:1.5;
+  -webkit-font-smoothing:antialiased;
+  overscroll-behavior-y:none;
+  -webkit-text-size-adjust:100%;
+  position:relative;
+}
+
+/* Aurora фоновые пятна */
+body::before,
+body::after{
+  content:"";
+  position:fixed;
+  border-radius:50%;
+  filter:blur(100px);
+  opacity:.5;
+  pointer-events:none;
+  z-index:0;
+  will-change:transform;
+}
+
+body::before{
+  width:500px;
+  height:500px;
+  background:radial-gradient(circle,var(--aurora-1) 0%,transparent 70%);
+  top:-150px;
+  left:-150px;
+  animation:aurora-float-1 20s ease-in-out infinite;
+}
+
+body::after{
+  width:600px;
+  height:600px;
+  background:radial-gradient(circle,var(--aurora-3) 0%,transparent 70%);
+  bottom:-200px;
+  right:-200px;
+  animation:aurora-float-2 25s ease-in-out infinite;
+}
+
+@keyframes aurora-float-1{
+  0%,100%{transform:translate(0,0) scale(1)}
+  33%{transform:translate(200px,150px) scale(1.2)}
+  66%{transform:translate(100px,300px) scale(.9)}
+}
+
+@keyframes aurora-float-2{
+  0%,100%{transform:translate(0,0) scale(1)}
+  33%{transform:translate(-150px,-200px) scale(1.1)}
+  66%{transform:translate(-300px,-100px) scale(.95)}
+}
+
+[data-theme="light"] body::before,
+[data-theme="light"] body::after{
+  opacity:.3;
+  filter:blur(120px);
+}
+
+/* ============================================================
+   КОНТЕЙНЕР
+   ============================================================ */
+.app{
+  max-width:900px;
+  margin:0 auto;
+  padding:16px;
+  padding-top:calc(16px + var(--safe-top));
+  padding-bottom:calc(140px + var(--safe-bottom));
+  position:relative;
+  z-index:1;
+}
+
+.screen{display:none;animation:screenIn .4s cubic-bezier(.4,0,.2,1)}
 .screen.active{display:block}
-@keyframes fadeIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
-.card{background:var(--bg-card);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow);margin-bottom:16px;transition:transform .2s,background .2s}
-.card:hover{background:var(--bg-card-hover)}
-h1{font-size:26px;font-weight:800;margin-bottom:8px;letter-spacing:-.5px}
-h2{font-size:20px;font-weight:700;margin-bottom:14px;letter-spacing:-.3px}
-h3{font-size:16px;font-weight:600;margin-bottom:10px}
-.subtitle{color:var(--text-dim);font-size:14px;margin-bottom:20px}
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:14px 22px;border:none;border-radius:14px;font-size:15px;font-weight:600;cursor:pointer;transition:all .2s;font-family:inherit;background:var(--accent);color:#fff;width:100%;touch-action:manipulation}
-.btn:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(108,92,231,.4)}
-.btn:active{transform:translateY(0) scale(.98)}
-.btn.secondary{background:var(--bg-card-hover);color:var(--text)}
-.btn.ghost{background:transparent;color:var(--text-dim);border:1px solid var(--bg-card-hover)}
-.btn.danger{background:var(--danger)}
-.btn.google{background:#fff;color:#333;border:1px solid #ddd}
-.btn.small{padding:8px 14px;font-size:13px;width:auto}
-.btn-row{display:flex;gap:10px;margin-top:12px;flex-wrap:wrap}
+
+@keyframes screenIn{
+  from{opacity:0;transform:translateY(16px) scale(.98)}
+  to{opacity:1;transform:translateY(0) scale(1)}
+}
+
+/* ============================================================
+   СТЕКЛЯННЫЕ КАРТОЧКИ
+   ============================================================ */
+.card{
+  background:var(--bg-glass);
+  backdrop-filter:blur(24px) saturate(180%);
+  -webkit-backdrop-filter:blur(24px) saturate(180%);
+  border-radius:var(--radius);
+  padding:22px;
+  box-shadow:var(--shadow);
+  margin-bottom:16px;
+  border:1px solid rgba(255,255,255,.08);
+  position:relative;
+  overflow:hidden;
+  transition:transform .25s cubic-bezier(.4,0,.2,1),box-shadow .25s,border-color .25s;
+}
+
+/* Тонкий световой блик сверху карточки */
+.card::before{
+  content:"";
+  position:absolute;
+  top:0;left:0;right:0;
+  height:1px;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.3),transparent);
+  opacity:.6;
+}
+
+[data-theme="light"] .card{
+  border:1px solid rgba(168,85,247,.15);
+}
+
+[data-theme="light"] .card::before{
+  background:linear-gradient(90deg,transparent,rgba(168,85,247,.3),transparent);
+}
+
+.card:active{
+  transform:scale(.99);
+  border-color:rgba(168,85,247,.3);
+}
+
+/* ============================================================
+   ТИПОГРАФИКА
+   ============================================================ */
+h1{
+  font-size:28px;
+  font-weight:800;
+  margin-bottom:8px;
+  letter-spacing:-.5px;
+  background:var(--accent-grad);
+  -webkit-background-clip:text;
+  background-clip:text;
+  -webkit-text-fill-color:transparent;
+  line-height:1.2;
+}
+
+h2{
+  font-size:20px;
+  font-weight:700;
+  margin-bottom:14px;
+  letter-spacing:-.3px;
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+
+h3{
+  font-size:16px;
+  font-weight:600;
+  margin-bottom:10px;
+}
+
+.subtitle{
+  color:var(--text-dim);
+  font-size:14px;
+  margin-bottom:20px;
+}
+
+/* ============================================================
+   КНОПКИ
+   ============================================================ */
+.btn{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  padding:16px 22px;
+  border:none;
+  border-radius:var(--radius-sm);
+  font-size:16px;
+  font-weight:600;
+  cursor:pointer;
+  transition:all .2s cubic-bezier(.4,0,.2,1);
+  font-family:inherit;
+  background:var(--accent-grad);
+  color:#fff;
+  width:100%;
+  touch-action:manipulation;
+  -webkit-user-select:none;
+  user-select:none;
+  min-height:52px;
+  position:relative;
+  overflow:hidden;
+  box-shadow:0 4px 20px rgba(168,85,247,.35);
+}
+
+.btn::before{
+  content:"";
+  position:absolute;
+  top:0;left:0;right:0;bottom:0;
+  background:linear-gradient(180deg,rgba(255,255,255,.2),transparent 50%);
+  pointer-events:none;
+}
+
+.btn:active{
+  transform:scale(.97);
+  box-shadow:0 2px 10px rgba(168,85,247,.5);
+}
+
+.btn.secondary{
+  background:var(--bg-glass-light);
+  backdrop-filter:blur(20px);
+  -webkit-backdrop-filter:blur(20px);
+  color:var(--text);
+  border:1px solid rgba(255,255,255,.12);
+  box-shadow:none;
+}
+
+.btn.secondary:active{
+  background:var(--bg-glass-hover);
+  border-color:rgba(168,85,247,.4);
+}
+
+.btn.ghost{
+  background:transparent;
+  color:var(--text-dim);
+  border:1px solid rgba(255,255,255,.08);
+  box-shadow:none;
+}
+
+.btn.ghost:active{
+  background:var(--bg-glass-light);
+  color:var(--text);
+}
+
+.btn.danger{
+  background:linear-gradient(135deg,#f43f5e,#ec4899);
+  box-shadow:0 4px 20px rgba(244,63,94,.4);
+}
+
+.btn.google{
+  background:#fff;
+  color:#333;
+  border:1px solid rgba(168,85,247,.2);
+  box-shadow:0 4px 20px rgba(0,0,0,.15);
+}
+
+.btn.small{
+  padding:10px 18px;
+  font-size:14px;
+  width:auto;
+  min-height:auto;
+}
+
+.btn-row{
+  display:flex;
+  gap:10px;
+  margin-top:12px;
+  flex-wrap:wrap;
+}
+
 .btn-row .btn{flex:1;min-width:100px}
+
+/* ============================================================
+   ФОРМЫ
+   ============================================================ */
 .field{margin-bottom:16px}
-.field label{display:block;font-size:13px;color:var(--text-dim);margin-bottom:6px;font-weight:500}
-input[type=text],input[type=number],input[type=email],input[type=password],select,textarea{width:100%;padding:14px 16px;background:var(--bg);border:2px solid transparent;border-radius:14px;color:var(--text);font-size:16px;font-family:inherit;transition:border .2s;outline:none}
-input:focus,select:focus,textarea:focus{border-color:var(--accent)}
+
+.field label{
+  display:block;
+  font-size:13px;
+  color:var(--text-dim);
+  margin-bottom:8px;
+  font-weight:500;
+  letter-spacing:.2px;
+}
+
+input[type=text],
+input[type=number],
+input[type=email],
+input[type=password],
+select,
+textarea{
+  width:100%;
+  padding:16px;
+  background:var(--bg-glass-light);
+  backdrop-filter:blur(20px);
+  -webkit-backdrop-filter:blur(20px);
+  border:1px solid rgba(255,255,255,.1);
+  border-radius:var(--radius-sm);
+  color:var(--text);
+  font-size:16px;
+  font-family:inherit;
+  transition:all .2s;
+  outline:none;
+  -webkit-appearance:none;
+  appearance:none;
+}
+
+input::placeholder{color:var(--text-mute)}
+
+input:focus,select:focus,textarea:focus{
+  border-color:rgba(168,85,247,.6);
+  box-shadow:0 0 0 4px rgba(168,85,247,.15);
+  background:var(--bg-glass);
+}
+
+/* ============================================================
+   РАДИО
+   ============================================================ */
 .radio-group{display:flex;gap:10px;flex-wrap:wrap}
-.radio-group label{flex:1;min-width:100px;padding:14px;background:var(--bg);border:2px solid transparent;border-radius:14px;text-align:center;cursor:pointer;font-size:14px;font-weight:600;transition:all .2s;color:var(--text);margin:0}
+
+.radio-group label{
+  flex:1;
+  min-width:100px;
+  padding:16px 14px;
+  background:var(--bg-glass-light);
+  backdrop-filter:blur(20px);
+  -webkit-backdrop-filter:blur(20px);
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:var(--radius-sm);
+  text-align:center;
+  cursor:pointer;
+  font-size:14px;
+  font-weight:600;
+  transition:all .2s;
+  color:var(--text);
+  margin:0;
+}
+
 .radio-group input{display:none}
-.radio-group label:has(input:checked){border-color:var(--accent);background:rgba(108,92,231,.12)}
-.progress-bar{height:6px;background:var(--bg);border-radius:3px;overflow:hidden;margin-bottom:24px}
-.progress-bar>div{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent-2));border-radius:3px;transition:width .4s ease}
-.hero-stat{text-align:center;padding:28px 20px}
-.hero-stat .num{font-size:56px;font-weight:800;background:linear-gradient(135deg,var(--accent),var(--accent-2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1}
-.hero-stat .label{color:var(--text-dim);font-size:14px;margin-top:6px}
-.macros{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:16px}
+
+.radio-group label:has(input:checked){
+  border-color:rgba(168,85,247,.7);
+  background:linear-gradient(135deg,rgba(168,85,247,.2),rgba(236,72,153,.15));
+  box-shadow:0 0 20px rgba(168,85,247,.3);
+}
+
+/* ============================================================
+   ПРОГРЕСС-БАР
+   ============================================================ */
+.progress-bar{
+  height:6px;
+  background:var(--bg-glass-light);
+  border-radius:3px;
+  overflow:hidden;
+  margin-bottom:24px;
+  border:1px solid rgba(255,255,255,.05);
+}
+
+.progress-bar>div{
+  height:100%;
+  background:var(--accent-grad);
+  border-radius:3px;
+  transition:width .5s cubic-bezier(.4,0,.2,1);
+  box-shadow:0 0 12px rgba(168,85,247,.6);
+}
+
+/* ============================================================
+   HERO STAT
+   ============================================================ */
+.hero-stat{
+  text-align:center;
+  padding:32px 20px;
+  position:relative;
+}
+
+.hero-stat::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:radial-gradient(circle at center,rgba(168,85,247,.15),transparent 70%);
+  pointer-events:none;
+}
+
+.hero-stat .num{
+  font-size:56px;
+  font-weight:900;
+  background:var(--accent-grad);
+  -webkit-background-clip:text;
+  background-clip:text;
+  -webkit-text-fill-color:transparent;
+  line-height:1;
+  letter-spacing:-2px;
+  position:relative;
+}
+
+.hero-stat .label{
+  color:var(--text-dim);
+  font-size:14px;
+  margin-top:8px;
+  position:relative;
+}
+
+/* ============================================================
+   МАКРОСЫ
+   ============================================================ */
+.macros{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:10px;
+  margin-top:16px;
+}
+
 .macros.four{grid-template-columns:repeat(4,1fr)}
-.macro{text-align:center;padding:14px 8px;background:var(--bg);border-radius:14px}
+
+.macro{
+  text-align:center;
+  padding:14px 8px;
+  background:var(--bg-glass-light);
+  backdrop-filter:blur(20px);
+  -webkit-backdrop-filter:blur(20px);
+  border-radius:var(--radius-sm);
+  border:1px solid rgba(255,255,255,.06);
+}
+
 .macro .val{font-size:20px;font-weight:700}
 .macro .name{font-size:12px;color:var(--text-dim);margin-top:2px}
-.macro.protein .val{color:#6c5ce7}
-.macro.fat .val{color:#ffa94d}
-.macro.carb .val{color:#00d2a8}
-.ring-wrap{display:flex;justify-content:center;margin:10px 0}
+
+.macro.protein .val{color:#a855f7}
+.macro.fat .val{color:#fb923c}
+.macro.carb .val{color:#06b6d4}
+
+/* ============================================================
+   КОЛЬЦО
+   ============================================================ */
+.ring-wrap{
+  display:flex;
+  justify-content:center;
+  margin:10px 0;
+  filter:drop-shadow(0 0 12px rgba(168,85,247,.3));
+}
+
 .ring{transform:rotate(-90deg)}
 .ring circle{fill:none;stroke-width:14;stroke-linecap:round}
-.ring .bg{stroke:var(--bg)}
-.ring .p{stroke:#6c5ce7;transition:stroke-dashoffset 1s ease}
-.ring .f{stroke:#ffa94d;transition:stroke-dashoffset 1s ease}
-.ring .c{stroke:#00d2a8;transition:stroke-dashoffset 1s ease}
-.list-item{display:flex;align-items:center;gap:12px;padding:14px;background:var(--bg);border-radius:14px;margin-bottom:10px;transition:transform .2s}
-.list-item:hover{transform:translateX(4px)}
-.list-item .icon{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;background:rgba(108,92,231,.15);flex-shrink:0}
+.ring .bg{stroke:rgba(255,255,255,.05)}
+.ring .p{stroke:url(#grad-p);transition:stroke-dashoffset 1s ease}
+.ring .f{stroke:#fb923c;transition:stroke-dashoffset 1s ease}
+.ring .c{stroke:#06b6d4;transition:stroke-dashoffset 1s ease}
+
+/* ============================================================
+   СПИСОК
+   ============================================================ */
+.list-item{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  padding:14px;
+  background:var(--bg-glass-light);
+  border-radius:var(--radius-sm);
+  margin-bottom:10px;
+  border:1px solid rgba(255,255,255,.05);
+  transition:all .2s;
+}
+
+.list-item:active{
+  transform:scale(.99);
+  background:var(--bg-glass-hover);
+}
+
+.list-item .icon{
+  width:44px;
+  height:44px;
+  border-radius:14px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:22px;
+  background:linear-gradient(135deg,rgba(168,85,247,.2),rgba(6,182,212,.15));
+  border:1px solid rgba(255,255,255,.08);
+  flex-shrink:0;
+}
+
 .list-item .info{flex:1;min-width:0}
-.list-item .info .title{font-weight:600;font-size:15px}
+.list-item .info .title{font-weight:600;font-size:15px;word-break:break-word}
 .list-item .info .sub{font-size:12px;color:var(--text-dim);margin-top:2px}
 .list-item .right{text-align:right;flex-shrink:0}
 .list-item .right .num{font-weight:700;font-size:15px}
 .list-item .right .unit{font-size:11px;color:var(--text-dim)}
-.badge{display:inline-block;padding:4px 10px;border-radius:8px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px}
-.badge.ok{background:rgba(81,207,102,.15);color:var(--ok)}
-.badge.warn{background:rgba(255,169,77,.15);color:var(--warn)}
-.badge.bad{background:rgba(255,107,107,.15);color:var(--danger)}
-.badge.info{background:rgba(108,92,231,.15);color:var(--accent)}
-.nav{position:fixed;bottom:0;left:0;right:0;background:var(--bg-card);border-top:1px solid rgba(255,255,255,.05);display:flex;justify-content:space-around;padding:8px 0 calc(8px + var(--safe-bottom));z-index:100;backdrop-filter:blur(20px);overflow-x:auto}
-.nav button{background:none;border:none;color:var(--text-dim);font-size:10px;font-weight:600;display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 8px;cursor:pointer;transition:color .2s;font-family:inherit;flex-shrink:0;touch-action:manipulation}
-.nav button .ic{font-size:18px}
-.nav button.active{color:var(--accent)}
-.timer-display{font-size:64px;font-weight:800;text-align:center;font-variant-numeric:tabular-nums;background:linear-gradient(135deg,var(--accent),var(--accent-2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin:20px 0}
-.photo-drop{border:2px dashed var(--bg-card-hover);border-radius:var(--radius);padding:30px;text-align:center;cursor:pointer;transition:all .2s;color:var(--text-dim)}
-.photo-drop:hover{border-color:var(--accent);color:var(--accent)}
+
+/* ============================================================
+   БЕЙДЖИ
+   ============================================================ */
+.badge{
+  display:inline-block;
+  padding:4px 10px;
+  border-radius:8px;
+  font-size:11px;
+  font-weight:700;
+  text-transform:uppercase;
+  letter-spacing:.5px;
+}
+
+.badge.ok{
+  background:rgba(16,185,129,.15);
+  color:#10b981;
+  border:1px solid rgba(16,185,129,.3);
+}
+
+.badge.warn{
+  background:rgba(251,146,60,.15);
+  color:#fb923c;
+  border:1px solid rgba(251,146,60,.3);
+}
+
+.badge.bad{
+  background:rgba(244,63,94,.15);
+  color:#f43f5e;
+  border:1px solid rgba(244,63,94,.3);
+}
+
+.badge.info{
+  background:rgba(168,85,247,.15);
+  color:#a855f7;
+  border:1px solid rgba(168,85,247,.3);
+}
+
+/* ============================================================
+   НИЖНЯЯ НАВИГАЦИЯ (стеклянная)
+   ============================================================ */
+.nav{
+  position:fixed;
+  bottom:0;
+  left:0;
+  right:0;
+  background:rgba(20,15,40,.75);
+  backdrop-filter:blur(30px) saturate(180%);
+  -webkit-backdrop-filter:blur(30px) saturate(180%);
+  border-top:1px solid rgba(255,255,255,.08);
+  display:flex;
+  justify-content:space-around;
+  padding:6px 0 calc(6px + var(--safe-bottom));
+  z-index:100;
+  overflow-x:auto;
+  scrollbar-width:none;
+}
+
+.nav::-webkit-scrollbar{display:none}
+
+[data-theme="light"] .nav{
+  background:rgba(255,255,255,.8);
+  border-top:1px solid rgba(168,85,247,.15);
+}
+
+.nav button{
+  background:none;
+  border:none;
+  color:var(--text-mute);
+  font-size:10px;
+  font-weight:600;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:3px;
+  padding:8px 6px;
+  cursor:pointer;
+  transition:all .2s;
+  font-family:inherit;
+  flex-shrink:0;
+  touch-action:manipulation;
+  min-width:56px;
+  position:relative;
+}
+
+.nav button .ic{
+  font-size:20px;
+  transition:transform .2s;
+}
+
+.nav button.active{
+  color:var(--accent-1);
+}
+
+.nav button.active .ic{
+  transform:scale(1.15);
+  filter:drop-shadow(0 0 8px rgba(168,85,247,.8));
+}
+
+.nav button.active::after{
+  content:"";
+  position:absolute;
+  top:0;
+  left:50%;
+  transform:translateX(-50%);
+  width:32px;
+  height:3px;
+  background:var(--accent-grad);
+  border-radius:0 0 4px 4px;
+  box-shadow:0 0 10px rgba(168,85,247,.8);
+}
+
+/* ============================================================
+   МЕНЮ «ЕЩЁ»
+   ============================================================ */
+.more-overlay{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.6);
+  backdrop-filter:blur(4px);
+  -webkit-backdrop-filter:blur(4px);
+  z-index:150;
+  opacity:0;
+  pointer-events:none;
+  transition:opacity .3s;
+}
+
+.more-overlay.show{
+  opacity:1;
+  pointer-events:auto;
+}
+
+.more-menu{
+  position:fixed;
+  bottom:0;
+  left:0;
+  right:0;
+  background:rgba(20,15,40,.95);
+  backdrop-filter:blur(30px) saturate(180%);
+  -webkit-backdrop-filter:blur(30px) saturate(180%);
+  border-top-left-radius:28px;
+  border-top-right-radius:28px;
+  border-top:1px solid rgba(255,255,255,.1);
+  padding:12px 16px calc(24px + var(--safe-bottom));
+  z-index:160;
+  transform:translateY(100%);
+  transition:transform .35s cubic-bezier(.4,0,.2,1);
+  max-height:80vh;
+  overflow-y:auto;
+}
+
+[data-theme="light"] .more-menu{
+  background:rgba(255,255,255,.95);
+}
+
+.more-menu.show{
+  transform:translateY(0);
+}
+
+.more-menu::before{
+  content:"";
+  display:block;
+  width:40px;
+  height:4px;
+  background:rgba(255,255,255,.2);
+  border-radius:2px;
+  margin:0 auto 16px;
+}
+
+.more-menu h3{
+  font-size:14px;
+  color:var(--text-dim);
+  text-transform:uppercase;
+  letter-spacing:1px;
+  margin-bottom:12px;
+  padding-left:4px;
+}
+
+.more-menu .more-item{
+  display:flex;
+  align-items:center;
+  gap:14px;
+  padding:14px 16px;
+  background:var(--bg-glass-light);
+  border:1px solid rgba(255,255,255,.06);
+  border-radius:16px;
+  margin-bottom:8px;
+  cursor:pointer;
+  transition:all .2s;
+  font-family:inherit;
+  color:var(--text);
+  font-size:15px;
+  font-weight:600;
+  width:100%;
+  text-align:left;
+}
+
+.more-menu .more-item:active{
+  background:linear-gradient(135deg,rgba(168,85,247,.2),rgba(236,72,153,.15));
+  border-color:rgba(168,85,247,.4);
+  transform:scale(.98);
+}
+
+.more-menu .more-item .ic{
+  font-size:24px;
+  width:32px;
+  text-align:center;
+}
+
+/* ============================================================
+   ТАЙМЕР
+   ============================================================ */
+.timer-display{
+  font-size:56px;
+  font-weight:900;
+  text-align:center;
+  font-variant-numeric:tabular-nums;
+  background:var(--accent-grad);
+  -webkit-background-clip:text;
+  background-clip:text;
+  -webkit-text-fill-color:transparent;
+  margin:20px 0;
+  letter-spacing:-2px;
+  filter:drop-shadow(0 0 20px rgba(168,85,247,.4));
+}
+
+/* ============================================================
+   ФОТО
+   ============================================================ */
+.photo-drop{
+  border:2px dashed rgba(168,85,247,.4);
+  border-radius:var(--radius);
+  padding:30px;
+  text-align:center;
+  cursor:pointer;
+  transition:all .2s;
+  color:var(--text-dim);
+  background:var(--bg-glass-light);
+}
+
+.photo-drop:active{
+  border-color:var(--accent-1);
+  color:var(--accent-1);
+  background:rgba(168,85,247,.1);
+}
+
 .photo-drop .big{font-size:40px;margin-bottom:10px}
-.photo-preview{width:100%;max-height:240px;object-fit:cover;border-radius:14px;margin-top:12px}
+.photo-preview{width:100%;max-height:240px;object-fit:cover;border-radius:16px;margin-top:12px}
+
+/* ============================================================
+   ГРАФИК
+   ============================================================ */
 .chart-wrap{position:relative;height:200px;margin-top:12px}
-.toast{position:fixed;top:calc(20px + var(--safe-top));left:50%;transform:translateX(-50%) translateY(-100px);background:var(--accent);color:#fff;padding:14px 24px;border-radius:14px;font-weight:600;font-size:14px;z-index:999;transition:transform .35s cubic-bezier(.34,1.56,.64,1);box-shadow:0 10px 30px rgba(108,92,231,.5);max-width:90%;text-align:center}
+
+/* ============================================================
+   TOAST
+   ============================================================ */
+.toast{
+  position:fixed;
+  top:calc(20px + var(--safe-top));
+  left:50%;
+  transform:translateX(-50%) translateY(-120px);
+  background:linear-gradient(135deg,#a855f7,#ec4899);
+  color:#fff;
+  padding:14px 24px;
+  border-radius:16px;
+  font-weight:600;
+  font-size:14px;
+  z-index:999;
+  transition:transform .4s cubic-bezier(.34,1.56,.64,1);
+  box-shadow:0 12px 40px rgba(168,85,247,.5);
+  max-width:90%;
+  text-align:center;
+  border:1px solid rgba(255,255,255,.2);
+}
+
 .toast.show{transform:translateX(-50%) translateY(0)}
-.toast.ok{background:var(--ok)}
-.toast.bad{background:var(--danger)}
-.empty{text-align:center;padding:40px 20px;color:var(--text-dim)}
+
+.toast.ok{
+  background:linear-gradient(135deg,#10b981,#06b6d4);
+  box-shadow:0 12px 40px rgba(16,185,129,.5);
+}
+
+.toast.bad{
+  background:linear-gradient(135deg,#f43f5e,#ec4899);
+  box-shadow:0 12px 40px rgba(244,63,94,.5);
+}
+
+/* ============================================================
+   ПУСТО
+   ============================================================ */
+.empty{
+  text-align:center;
+  padding:40px 20px;
+  color:var(--text-dim);
+}
+
 .empty .big{font-size:48px;margin-bottom:12px}
+
+/* ============================================================
+   CHIPS
+   ============================================================ */
+.chips{
+  display:flex;
+  gap:8px;
+  overflow-x:auto;
+  padding-bottom:8px;
+  margin-bottom:12px;
+  -webkit-overflow-scrolling:touch;
+  scrollbar-width:none;
+}
+
+.chips::-webkit-scrollbar{display:none}
+
+.chip{
+  padding:10px 18px;
+  background:var(--bg-glass-light);
+  backdrop-filter:blur(20px);
+  -webkit-backdrop-filter:blur(20px);
+  border-radius:20px;
+  font-size:13px;
+  font-weight:600;
+  white-space:nowrap;
+  cursor:pointer;
+  border:1px solid rgba(255,255,255,.08);
+  transition:all .2s;
+  color:var(--text-dim);
+  font-family:inherit;
+  touch-action:manipulation;
+}
+
+.chip.active{
+  background:var(--accent-grad);
+  color:#fff;
+  border-color:transparent;
+  box-shadow:0 4px 16px rgba(168,85,247,.4);
+}
+
+/* ============================================================
+   РЕЦЕПТ
+   ============================================================ */
+.ingr-row{
+  display:flex;
+  justify-content:space-between;
+  gap:12px;
+  padding:12px 0;
+  border-bottom:1px solid rgba(255,255,255,.06);
+  font-size:14px;
+}
+
+.ingr-row:last-child{border-bottom:none}
+.ingr-row .name{color:var(--text)}
+.ingr-row .qty{color:var(--text-dim);font-weight:600;text-align:right}
+
+.step{display:flex;gap:12px;margin-bottom:14px}
+
+.step .num{
+  width:32px;
+  height:32px;
+  border-radius:12px;
+  flex-shrink:0;
+  background:var(--accent-grad);
+  color:#fff;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-weight:700;
+  font-size:13px;
+  box-shadow:0 4px 12px rgba(168,85,247,.3);
+}
+
+.step .text{flex:1;font-size:14px;padding-top:6px}
+
+/* ============================================================
+   УСТАНОВКА
+   ============================================================ */
+.install-banner{
+  position:fixed;
+  left:12px;
+  right:12px;
+  bottom:calc(80px + var(--safe-bottom));
+  background:var(--accent-grad);
+  color:#fff;
+  padding:14px 18px;
+  border-radius:18px;
+  box-shadow:0 12px 40px rgba(168,85,247,.5);
+  display:none;
+  align-items:center;
+  gap:12px;
+  z-index:150;
+  border:1px solid rgba(255,255,255,.2);
+}
+
+.install-banner.show{
+  display:flex;
+  animation:screenIn .4s ease;
+}
+
+.install-banner .txt{flex:1;font-size:14px;font-weight:600}
+
+.install-banner button{
+  background:rgba(255,255,255,.25);
+  border:none;
+  color:#fff;
+  padding:10px 16px;
+  border-radius:12px;
+  font-weight:700;
+  font-size:14px;
+  cursor:pointer;
+  font-family:inherit;
+  min-height:44px;
+  backdrop-filter:blur(10px);
+}
+
+/* ============================================================
+   АВТОРИЗАЦИЯ
+   ============================================================ */
+.auth-tabs{
+  display:flex;
+  gap:8px;
+  margin-bottom:20px;
+  padding:4px;
+  background:var(--bg-glass-light);
+  border-radius:16px;
+  border:1px solid rgba(255,255,255,.06);
+}
+
+.auth-tabs button{
+  flex:1;
+  padding:14px;
+  background:transparent;
+  border:none;
+  border-radius:12px;
+  color:var(--text-dim);
+  font-weight:700;
+  cursor:pointer;
+  font-family:inherit;
+  font-size:15px;
+  transition:all .2s;
+  min-height:50px;
+}
+
+.auth-tabs button.active{
+  background:var(--accent-grad);
+  color:#fff;
+  box-shadow:0 4px 16px rgba(168,85,247,.4);
+}
+
+.divider{
+  text-align:center;
+  color:var(--text-mute);
+  font-size:13px;
+  margin:20px 0;
+  position:relative;
+}
+
+.divider::before{
+  content:"";
+  position:absolute;
+  top:50%;left:0;right:0;
+  height:1px;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.15),transparent);
+  z-index:0;
+}
+
+.divider span{
+  background:var(--bg-glass);
+  backdrop-filter:blur(20px);
+  -webkit-backdrop-filter:blur(20px);
+  padding:0 16px;
+  position:relative;
+  z-index:1;
+}
+
+/* ============================================================
+   АДАПТИВ
+   ============================================================ */
+@media(max-width:480px){
+  h1{font-size:24px}
+  .hero-stat .num{font-size:48px}
+  .timer-display{font-size:44px}
+  .macros.four{grid-template-columns:repeat(2,1fr)}
+  .card{padding:18px;border-radius:20px}
+  .btn{font-size:15px}
+}
+
+/* Убираем hover на тач-устройствах */
+@media(hover:hover){
+  .card:hover{
+    transform:translateY(-2px);
+    box-shadow:var(--shadow-hover);
+    border-color:rgba(168,85,247,.25);
+  }
+  .btn:hover{transform:translateY(-1px)}
+  .btn.secondary:hover{background:var(--bg-glass-hover)}
+  .chip:hover{background:var(--bg-glass-hover);color:var(--text)}
+  .list-item:hover{background:var(--bg-glass-hover)}
+}
+
 .hidden{display:none!important}
-.stagger>*{animation:fadeIn .4s ease backwards}
+.stagger>*{animation:screenIn .4s ease backwards}
 .stagger>*:nth-child(1){animation-delay:.05s}
 .stagger>*:nth-child(2){animation-delay:.1s}
 .stagger>*:nth-child(3){animation-delay:.15s}
 .stagger>*:nth-child(4){animation-delay:.2s}
 .stagger>*:nth-child(5){animation-delay:.25s}
 .stagger>*:nth-child(6){animation-delay:.3s}
-.chips{display:flex;gap:8px;overflow-x:auto;padding-bottom:8px;margin-bottom:12px;-webkit-overflow-scrolling:touch;scrollbar-width:none}
-.chips::-webkit-scrollbar{display:none}
-.chip{padding:8px 16px;background:var(--bg);border-radius:20px;font-size:13px;font-weight:600;white-space:nowrap;cursor:pointer;border:2px solid transparent;transition:all .2s;color:var(--text-dim);font-family:inherit;touch-action:manipulation}
-.chip:hover{background:var(--bg-card-hover)}
-.chip.active{background:rgba(108,92,231,.15);color:var(--accent);border-color:var(--accent)}
-.ingr-row{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.06);font-size:14px}
-.ingr-row:last-child{border-bottom:none}
-.ingr-row .name{color:var(--text)}
-.ingr-row .qty{color:var(--text-dim);font-weight:600}
-.step{display:flex;gap:12px;margin-bottom:14px}
-.step .num{width:28px;height:28px;border-radius:50%;flex-shrink:0;background:rgba(108,92,231,.15);color:var(--accent);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px}
-.step .text{flex:1;font-size:14px;padding-top:4px}
-.install-banner{position:fixed;left:12px;right:12px;bottom:calc(80px + var(--safe-bottom));background:var(--accent);color:#fff;padding:14px 18px;border-radius:16px;box-shadow:0 10px 30px rgba(108,92,231,.5);display:none;align-items:center;gap:12px;z-index:150;animation:fadeIn .4s ease}
-.install-banner.show{display:flex}
-.install-banner .txt{flex:1;font-size:14px;font-weight:600}
-.install-banner button{background:rgba(255,255,255,.2);border:none;color:#fff;padding:8px 14px;border-radius:10px;font-weight:700;font-size:13px;cursor:pointer;font-family:inherit}
-.auth-tabs{display:flex;gap:8px;margin-bottom:20px}
-.auth-tabs button{flex:1;padding:12px;background:var(--bg);border:2px solid transparent;border-radius:12px;color:var(--text-dim);font-weight:700;cursor:pointer;font-family:inherit;font-size:14px;transition:all .2s}
-.auth-tabs button.active{background:rgba(108,92,231,.15);border-color:var(--accent);color:var(--accent)}
-.divider{text-align:center;color:var(--text-dim);font-size:13px;margin:16px 0;position:relative}
-.divider::before{content:"";position:absolute;top:50%;left:0;right:0;height:1px;background:var(--bg-card-hover);z-index:0}
-.divider span{background:var(--bg-card);padding:0 12px;position:relative;z-index:1}
-@media(max-width:480px){h1{font-size:22px}.hero-stat .num{font-size:44px}.timer-display{font-size:52px}.macros.four{grid-template-columns:repeat(2,1fr)}}
 </style>
 </head>
 <body>
 
+<!-- SVG-градиент для кольца -->
+<svg width="0" height="0" style="position:absolute">
+  <defs>
+    <linearGradient id="grad-p" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#a855f7"/>
+      <stop offset="50%" stop-color="#ec4899"/>
+      <stop offset="100%" stop-color="#06b6d4"/>
+    </linearGradient>
+  </defs>
+</svg>
+
+<!-- Aurora background -->
+<div style="position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden">
+  <div style="position:absolute;top:20%;left:50%;width:600px;height:600px;transform:translate(-50%,-50%);background:radial-gradient(circle,rgba(236,72,153,.25) 0%,transparent 60%);filter:blur(80px);animation:aurora-float-1 30s ease-in-out infinite"></div>
+</div>
+
 <div class="app">
+
+  <!-- ЭКРАН АВТОРИЗАЦИИ -->
   <div id="screen-auth" class="screen">
     <div style="text-align:center;padding:40px 0 20px">
-      <div style="font-size:64px">💪</div>
-      <h1 style="margin-top:12px">FitLife</h1>
+      <div style="font-size:72px;filter:drop-shadow(0 0 30px rgba(168,85,247,.6))">💪</div>
+      <h1 style="margin-top:12px;font-size:36px">FitLife</h1>
       <p class="subtitle">Твой персональный фитнес-помощник</p>
     </div>
     <div class="auth-tabs">
@@ -143,14 +1087,14 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
       <button id="tab-register" onclick="showAuth('register')">Регистрация</button>
     </div>
     <div id="auth-login" class="card">
-      <h2>Вход в аккаунт</h2>
+      <h2>🔓 Вход в аккаунт</h2>
       <div class="field"><label>Email</label>
         <input type="email" id="login-email" placeholder="you@example.com" autocomplete="email">
       </div>
       <div class="field"><label>Пароль</label>
         <input type="password" id="login-pass" placeholder="••••••" autocomplete="current-password">
       </div>
-      <button class="btn" onclick="doLogin()">🔓 Войти</button>
+      <button class="btn" onclick="doLogin()">Войти</button>
       <div class="divider"><span>или</span></div>
       <button class="btn google" onclick="doGoogleLogin()">
         <svg width="18" height="18" viewBox="0 0 48 48" style="vertical-align:middle">
@@ -163,17 +1107,17 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
       </button>
     </div>
     <div id="auth-register" class="card hidden">
-      <h2>Создать аккаунт</h2>
+      <h2>✨ Создать аккаунт</h2>
       <div class="field"><label>Имя</label>
         <input type="text" id="reg-name" placeholder="Алекс" maxlength="20">
       </div>
       <div class="field"><label>Email</label>
         <input type="email" id="reg-email" placeholder="you@example.com" autocomplete="email">
       </div>
-      <div class="field"><label>Пароль (минимум 6 символов)</label>
+      <div class="field"><label>Пароль (мин. 6 символов)</label>
         <input type="password" id="reg-pass" placeholder="••••••" autocomplete="new-password">
       </div>
-      <button class="btn" onclick="doRegister()">✨ Создать аккаунт</button>
+      <button class="btn" onclick="doRegister()">Создать аккаунт</button>
       <div class="divider"><span>или</span></div>
       <button class="btn google" onclick="doGoogleLogin()">
         <svg width="18" height="18" viewBox="0 0 48 48" style="vertical-align:middle">
@@ -192,6 +1136,7 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
     </div>
   </div>
 
+  <!-- ОНБОРДИНГ -->
   <div id="screen-onboarding" class="screen">
     <div class="progress-bar"><div id="ob-progress" style="width:20%"></div></div>
     <div class="card" id="ob-step-1">
@@ -209,9 +1154,9 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
     <div class="card hidden" id="ob-step-2">
       <h1>Твои параметры 📏</h1>
       <p class="subtitle">Всё считается автоматически.</p>
-      <div class="field"><label>Возраст</label><input type="number" id="ob-age" placeholder="15" min="10" max="100"></div>
-      <div class="field"><label>Рост (см)</label><input type="number" id="ob-height" placeholder="171" min="100" max="250"></div>
-      <div class="field"><label>Вес (кг)</label><input type="number" id="ob-weight" placeholder="92" min="30" max="300" step="0.1"></div>
+      <div class="field"><label>Возраст</label><input type="number" id="ob-age" placeholder="15" min="10" max="100" inputmode="numeric"></div>
+      <div class="field"><label>Рост (см)</label><input type="number" id="ob-height" placeholder="171" min="100" max="250" inputmode="numeric"></div>
+      <div class="field"><label>Вес (кг)</label><input type="number" id="ob-weight" placeholder="92" min="30" max="300" step="0.1" inputmode="decimal"></div>
       <div class="btn-row">
         <button class="btn secondary" onclick="obNext(1)">← Назад</button>
         <button class="btn" onclick="obNext(3)">Дальше →</button>
@@ -243,6 +1188,13 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
           <option value="any">Везде</option>
         </select>
       </div>
+      <div class="field"><label>Уровень подготовки</label>
+        <div class="radio-group">
+          <label><input type="radio" name="ob-level" value="novice" checked><span>Новичок</span></label>
+          <label><input type="radio" name="ob-level" value="middle"><span>Средний</span></label>
+          <label><input type="radio" name="ob-level" value="pro"><span>Продвинутый</span></label>
+        </div>
+      </div>
       <div class="btn-row">
         <button class="btn secondary" onclick="obNext(2)">← Назад</button>
         <button class="btn" onclick="finishOnboarding()">Готово! 🚀</button>
@@ -250,9 +1202,11 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
     </div>
   </div>
 
+  <!-- ГЛАВНАЯ -->
   <div id="screen-dashboard" class="screen">
     <h1 id="dash-greeting">Привет!</h1>
     <p class="subtitle" id="dash-sub">Твоя норма на сегодня</p>
+    <div id="today-workout"></div>
     <div class="card hero-stat">
       <div class="num" id="dash-calories">0</div>
       <div class="label">ккал в день</div>
@@ -262,7 +1216,7 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
         <div class="macro carb"><div class="val" id="dash-carb">0</div><div class="name">Углеводы, г</div></div>
       </div>
     </div>
-    <div class="card"><h2>Баланс БЖУ</h2>
+    <div class="card"><h2>⚖️ Баланс БЖУ</h2>
       <div class="ring-wrap"><svg class="ring" width="180" height="180" viewBox="0 0 180 180">
         <circle class="bg" cx="90" cy="90" r="70"></circle>
         <circle class="p" id="ring-p" cx="90" cy="90" r="70"></circle>
@@ -270,27 +1224,34 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
         <circle class="c" id="ring-c" cx="90" cy="90" r="70"></circle>
       </svg></div>
     </div>
-    <div class="card"><h2>Быстрые действия</h2>
+    <div class="card"><h2>⚡ Быстрые действия</h2>
       <button class="btn" onclick="showScreen('meal-builder')">🍽️ Создать своё блюдо</button>
-      <div style="height:10px"></div>
-      <button class="btn secondary" onclick="showScreen('my-meals')">📌 Мои блюда</button>
       <div style="height:10px"></div>
       <button class="btn secondary" onclick="showScreen('nutrition')">🥗 Рацион на сегодня</button>
       <div style="height:10px"></div>
-      <button class="btn secondary" onclick="showScreen('workout')">🏃 Тренировка</button>
+      <button class="btn secondary" onclick="showScreen('my-plan')">📋 Мой план тренировок</button>
       <div style="height:10px"></div>
       <button class="btn secondary" onclick="showScreen('search')">🔍 Поиск продуктов</button>
     </div>
-    <div class="card"><h2>Прогресс веса</h2>
+    <div class="card"><h2>📊 Прогресс веса</h2>
       <div class="chart-wrap"><canvas id="weight-chart"></canvas></div>
       <div id="weight-empty" class="empty hidden"><div class="big">📊</div><div>Пока нет замеров</div></div>
     </div>
   </div>
 
+  <!-- МОЙ ПЛАН -->
+  <div id="screen-my-plan" class="screen">
+    <h1>Мой план 🏋️</h1>
+    <p class="subtitle">Автоматически под твою цель</p>
+    <div id="my-plan-content"></div>
+    <button class="btn ghost" onclick="showScreen('dashboard')">← На главную</button>
+  </div>
+
+  <!-- РАЦИОН -->
   <div id="screen-nutrition" class="screen">
-    <h1>Рацион на сегодня 🍽️</h1>
+    <h1>Рацион 🍽️</h1>
     <p class="subtitle">Пересчитывается автоматически</p>
-    <div class="card"><div class="list-item" style="background:transparent;padding:0">
+    <div class="card"><div class="list-item" style="background:transparent;padding:0;border:none">
       <div class="info"><div class="title">Итого за день</div><div class="sub" id="nutri-total-sub">0 ккал</div></div>
       <div class="right"><div class="num" id="nutri-total-cal">0</div><div class="unit">ккал</div></div>
     </div></div>
@@ -300,8 +1261,9 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
     <button class="btn ghost" onclick="showScreen('dashboard')">← На главную</button>
   </div>
 
+  <!-- РЕЦЕПТЫ -->
   <div id="screen-recipes" class="screen">
-    <h1>Все рецепты 📖</h1>
+    <h1>Рецепты 📖</h1>
     <p class="subtitle">С пропорциями и пошаговой готовкой</p>
     <div class="chips" id="recipe-chips"></div>
     <div id="recipe-list" class="stagger"></div>
@@ -310,100 +1272,78 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
 
   <div id="screen-recipe" class="screen">
     <div id="recipe-detail"></div>
-    <button class="btn ghost" onclick="showScreen('recipes')">← К рецептам</button>
+    <button class="btn ghost" onclick="showScreen('recipes')">← Назад</button>
   </div>
 
-  <div id="screen-workout" class="screen">
-    <h1>Тренировки 🏃</h1>
-    <p class="subtitle" id="workout-sub">Программа подбирается автоматически</p>
-    <div class="card"><h2>⏱️ Таймер планки</h2>
-      <div class="timer-display" id="timer-display">00:00</div>
-      <div class="btn-row">
-        <button class="btn" id="timer-start" onclick="toggleTimer()">▶ Старт</button>
-        <button class="btn secondary" onclick="resetTimer()">↺ Сброс</button>
-      </div>
-    </div>
-    <div id="workout-list" class="stagger"></div>
-    <button class="btn ghost" onclick="showScreen('dashboard')">← На главную</button>
-  </div>
-
+  <!-- УПРАЖНЕНИЯ -->
   <div id="screen-exercises" class="screen">
-    <h1>Все упражнения 💪</h1>
+    <h1>Упражнения 💪</h1>
     <p class="subtitle">Дом, улица, зал</p>
     <div class="chips" id="exercise-chips"></div>
     <div id="exercise-list" class="stagger"></div>
     <button class="btn ghost" onclick="showScreen('dashboard')">← На главную</button>
   </div>
 
+  <!-- ЗАМЕРЫ -->
   <div id="screen-measure" class="screen">
-    <h1>Замеры тела 📏</h1>
+    <h1>Замеры 📏</h1>
     <p class="subtitle">При сохранении норма пересчитается</p>
-    <div class="card"><h2>Новый замер</h2>
-      <div class="field"><label>Вес (кг)</label><input type="number" id="m-weight" step="0.1" placeholder="92"></div>
-      <div class="field"><label>Грудь (см)</label><input type="number" id="m-chest" step="0.1" placeholder="100"></div>
-      <div class="field"><label>Талия (см)</label><input type="number" id="m-waist" step="0.1" placeholder="90"></div>
-      <div class="field"><label>Бёдра (см)</label><input type="number" id="m-hips" step="0.1" placeholder="100"></div>
-      <div class="field"><label>Рука (см)</label><input type="number" id="m-arm" step="0.1" placeholder="35"></div>
-      <button class="btn" onclick="saveMeasurement()">💾 Сохранить и пересчитать</button>
+    <div class="card"><h2>➕ Новый замер</h2>
+      <div class="field"><label>Вес (кг)</label><input type="number" id="m-weight" step="0.1" placeholder="92" inputmode="decimal"></div>
+      <div class="field"><label>Грудь (см)</label><input type="number" id="m-chest" step="0.1" placeholder="100" inputmode="decimal"></div>
+      <div class="field"><label>Талия (см)</label><input type="number" id="m-waist" step="0.1" placeholder="90" inputmode="decimal"></div>
+      <div class="field"><label>Бёдра (см)</label><input type="number" id="m-hips" step="0.1" placeholder="100" inputmode="decimal"></div>
+      <div class="field"><label>Рука (см)</label><input type="number" id="m-arm" step="0.1" placeholder="35" inputmode="decimal"></div>
+      <button class="btn" onclick="saveMeasurement()">💾 Сохранить</button>
     </div>
-    <div class="card"><h2>История замеров</h2><div id="measure-history"></div></div>
+    <div class="card"><h2>📅 История</h2><div id="measure-history"></div></div>
     <button class="btn ghost" onclick="showScreen('dashboard')">← На главную</button>
   </div>
 
+  <!-- ПОИСК -->
   <div id="screen-search" class="screen">
-    <h1>Поиск продуктов 🔍</h1>
+    <h1>Поиск 🔍</h1>
     <p class="subtitle">Вердикт обновляется автоматически</p>
     <div class="card">
       <div class="field"><label>Название продукта</label>
-        <input type="text" id="search-input" placeholder="банан, йогурт греческий, сосиски..." autocomplete="off" oninput="liveSearch()">
+        <input type="text" id="search-input" placeholder="банан, йогурт, сосиски..." autocomplete="off" oninput="liveSearch()">
       </div>
       <div class="chips" id="search-cats"></div>
       <div class="btn-row">
-        <button class="btn" onclick="searchProduct()">🔍 Найти</button>
+        <button class="btn" onclick="searchProduct()">Найти</button>
         <button class="btn secondary" onclick="searchFromAPI()">🌐 Онлайн</button>
-      </div>
-    </div>
-    <div class="card"><h2>📷 Распознать по фото</h2>
-      <p class="subtitle" style="margin-bottom:12px">Загрузи фото, выбери продукт — КБЖУ автоматически</p>
-      <div class="photo-drop" onclick="document.getElementById('photo-input').click()">
-        <div class="big">📷</div><div>Нажми, чтобы загрузить фото</div>
-      </div>
-      <input type="file" id="photo-input" accept="image/*" class="hidden" onchange="handlePhoto(event)">
-      <img id="photo-preview" class="photo-preview hidden" alt="Превью">
-      <div id="photo-result" class="hidden" style="margin-top:16px">
-        <div class="field"><label>Что на фото?</label><select id="photo-product-select" onchange="analyzePhoto()"></select></div>
-        <div id="photo-verdict"></div>
       </div>
     </div>
     <div id="search-result"></div>
     <button class="btn ghost" onclick="showScreen('dashboard')">← На главную</button>
   </div>
 
+  <!-- КОНСТРУКТОР -->
   <div id="screen-meal-builder" class="screen">
-    <h1>Конструктор блюд 🍽️</h1>
-    <p class="subtitle">Собери своё блюдо из продуктов — КБЖУ посчитается автоматически</p>
+    <h1>Конструктор 🍽️</h1>
+    <p class="subtitle">Собери своё блюдо — КБЖУ посчитается сам</p>
     <div class="card">
-      <h2>Название блюда</h2>
+      <h2>📝 Название</h2>
       <div class="field">
-        <input type="text" id="mb-name" placeholder="Например: Мой протеиновый завтрак" maxlength="60">
+        <input type="text" id="mb-name" placeholder="Например: Мой завтрак" maxlength="60">
       </div>
-      <h2 style="margin-top:20px">Добавить ингредиент</h2>
+      <h2 style="margin-top:20px">➕ Ингредиент</h2>
       <div class="field">
         <label>Продукт</label>
         <select id="mb-product-select"></select>
       </div>
       <div class="field">
         <label>Граммовка (г)</label>
-        <input type="number" id="mb-grams" value="100" min="1" max="2000" step="1">
+        <input type="number" id="mb-grams" value="100" min="1" max="2000" step="1" inputmode="numeric">
       </div>
-      <button class="btn" onclick="addIngredientToMeal()">➕ Добавить в блюдо</button>
+      <button class="btn" onclick="addIngredientToMeal()">Добавить</button>
     </div>
     <div class="card">
-      <h2>Состав блюда</h2>
+      <h2>🥗 Состав</h2>
       <div id="mb-items"></div>
     </div>
     <div class="card">
-      <h2>Итого КБЖУ</h2>
+      <h2>📊 Итого КБЖУ</h2>
       <div class="macros four">
         <div class="macro"><div class="val" id="mb-cal">0</div><div class="name">ккал</div></div>
         <div class="macro protein"><div class="val" id="mb-p">0</div><div class="name">Белки</div></div>
@@ -418,35 +1358,31 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
     <button class="btn ghost" onclick="showScreen('dashboard')">← На главную</button>
   </div>
 
+  <!-- МОИ БЛЮДА -->
   <div id="screen-my-meals" class="screen">
     <h1>Мои блюда 📌</h1>
-    <p class="subtitle">Твои собственные рецепты с точным КБЖУ</p>
+    <p class="subtitle">Твои рецепты с точным КБЖУ</p>
     <div id="my-meals-list"></div>
     <div style="height:10px"></div>
-    <button class="btn" onclick="showScreen('meal-builder')">➕ Создать новое блюдо</button>
+    <button class="btn" onclick="showScreen('meal-builder')">➕ Создать блюдо</button>
     <div style="height:10px"></div>
     <button class="btn ghost" onclick="showScreen('dashboard')">← На главную</button>
   </div>
 
+  <!-- ПРОФИЛЬ -->
   <div id="screen-profile" class="screen">
     <h1>Профиль ⚙️</h1>
     <p class="subtitle">Меняешь — всё пересчитывается</p>
-    <div class="card"><h2>Твои данные</h2><div id="profile-info"></div>
+    <div class="card"><h2>👤 Твои данные</h2><div id="profile-info"></div>
       <div style="height:10px"></div><button class="btn secondary" onclick="editProfile()">✏️ Изменить</button>
     </div>
-
     <div class="card"><h2>📱 Приложение</h2>
       <p style="font-size:13px;color:var(--text-dim);line-height:1.6;margin-bottom:12px">
-        Установи FitLife на телефон, чтобы открывать без браузера, как обычное приложение.
+        Установи FitLife на телефон, чтобы открывать без браузера.
       </p>
-      <button class="btn" onclick="installApp()" id="install-btn">📲 Установить на iPhone / ПК</button>
-      <div style="height:10px"></div>
-      <a href="fitlife.apk" download style="text-decoration:none">
-        <button class="btn secondary">📥 Скачать для Android (.apk)</button>
-      </a>
+      <button class="btn" onclick="installApp()" id="install-btn">📲 Установить приложение</button>
     </div>
-
-    <div class="card"><h2>Данные</h2>
+    <div class="card"><h2>💾 Данные</h2>
       <button class="btn secondary" onclick="exportData()">📤 Экспорт (JSON)</button>
       <div style="height:10px"></div>
       <button class="btn secondary" onclick="document.getElementById('import-input').click()">📥 Импорт (JSON)</button>
@@ -454,16 +1390,14 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
       <div style="height:10px"></div>
       <button class="btn secondary" onclick="toggleTheme()">🌓 Сменить тему</button>
     </div>
-
-    <div class="card"><h2>Аккаунт</h2>
-      <button class="btn danger" onclick="doLogout()">🚪 Выйти из аккаунта</button>
+    <div class="card"><h2>🔐 Аккаунт</h2>
+      <button class="btn danger" onclick="doLogout()">🚪 Выйти</button>
       <div style="height:10px"></div>
       <button class="btn ghost" onclick="resetAll()">🗑️ Сбросить локальные данные</button>
     </div>
-
     <div class="card"><h2>⚠️ Важно</h2>
       <p style="font-size:13px;color:var(--text-dim);line-height:1.6">
-        Если тебе меньше 18 лет — обязательно проконсультируйся с врачом. Сайт — помощник, а не медицинский совет.
+        Если тебе меньше 18 лет — проконсультируйся с врачом.
       </p>
     </div>
     <button class="btn ghost" onclick="showScreen('dashboard')">← На главную</button>
@@ -471,22 +1405,31 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
 
 </div>
 
+<!-- НИЖНЯЯ НАВИГАЦИЯ -->
 <div class="nav hidden" id="nav">
   <button data-screen="dashboard" onclick="showScreen('dashboard')"><span class="ic">🏠</span>Главная</button>
   <button data-screen="nutrition" onclick="showScreen('nutrition')"><span class="ic">🍽️</span>Рацион</button>
+  <button data-screen="my-plan" onclick="showScreen('my-plan')"><span class="ic">🏋️</span>План</button>
   <button data-screen="meal-builder" onclick="showScreen('meal-builder')"><span class="ic">➕</span>Блюдо</button>
-  <button data-screen="my-meals" onclick="showScreen('my-meals')"><span class="ic">📌</span>Мои</button>
-  <button data-screen="recipes" onclick="showScreen('recipes')"><span class="ic">📖</span>Рецепты</button>
-  <button data-screen="workout" onclick="showScreen('workout')"><span class="ic">🏃</span>Трен.</button>
-  <button data-screen="exercises" onclick="showScreen('exercises')"><span class="ic">💪</span>Упр.</button>
-  <button data-screen="search" onclick="showScreen('search')"><span class="ic">🔍</span>Поиск</button>
-  <button data-screen="measure" onclick="showScreen('measure')"><span class="ic">📏</span>Замеры</button>
-  <button data-screen="profile" onclick="showScreen('profile')"><span class="ic">⚙️</span>Профиль</button>
+  <button onclick="openMoreMenu()"><span class="ic">⋯</span>Ещё</button>
 </div>
 
+<!-- МЕНЮ «ЕЩЁ» -->
+<div class="more-overlay" id="more-overlay" onclick="closeMoreMenu()"></div>
+<div class="more-menu" id="more-menu">
+  <h3>Ещё разделы</h3>
+  <button class="more-item" onclick="showScreen('recipes')"><span class="ic">📖</span>Рецепты</button>
+  <button class="more-item" onclick="showScreen('exercises')"><span class="ic">💪</span>Упражнения</button>
+  <button class="more-item" onclick="showScreen('search')"><span class="ic">🔍</span>Поиск продуктов</button>
+  <button class="more-item" onclick="showScreen('measure')"><span class="ic">📏</span>Замеры тела</button>
+  <button class="more-item" onclick="showScreen('my-meals')"><span class="ic">📌</span>Мои блюда</button>
+  <button class="more-item" onclick="showScreen('profile')"><span class="ic">⚙️</span>Профиль</button>
+</div>
+
+<!-- БАННЕР УСТАНОВКИ -->
 <div class="install-banner" id="install-banner">
-  <div class="txt">📲 Установить FitLife на телефон?</div>
-  <button onclick="installApp()">Установить</button>
+  <div class="txt">📲 Установить FitLife?</div>
+  <button onclick="installApp()">Да</button>
   <button onclick="dismissInstall()" style="background:transparent;padding:8px">✕</button>
 </div>
 
@@ -495,7 +1438,6 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
 <script src="data.js"></script>
 <script type="module" src="app.js"></script>
 <script>
-  // Регистрация Service Worker для PWA
   if ("serviceWorker" in navigator) {
     window.addEventListener("load", () => {
       navigator.serviceWorker.register("./sw.js")
