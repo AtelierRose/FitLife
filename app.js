@@ -1,6 +1,6 @@
 /* ============================================================
    FitLife — основная логика
-   Версия: 3.0 (генератор плана тренировок)
+   Версия: 4.0 (график веса + описания упражнений)
    Файл: app.js
    ============================================================ */
 
@@ -24,14 +24,14 @@ let state = {
   measurements: [],
   customMeals: [],
   workoutLog: {},
-  workoutPlan: null,        // сгенерированный план на неделю
+  workoutPlan: null,
   theme: "dark",
   planSeed: 0,
   recipeFilter: "all",
   exerciseFilter: "all",
   searchCat: "all",
   currentMealItems: [],
-  level: "novice"           // уровень пользователя
+  level: "novice"
 };
 
 function saveLocal() {
@@ -76,7 +76,6 @@ function showScreen(name) {
   );
   if (name === "dashboard") renderDashboard();
   if (name === "nutrition") generateMealPlan();
-  if (name === "workout") renderWorkout();
   if (name === "my-plan") renderMyPlan();
   if (name === "measure") renderMeasurements();
   if (name === "profile") renderProfile();
@@ -103,7 +102,6 @@ function animateNumber(id, target) {
   requestAnimationFrame(tick);
 }
 
-/* Меню «Ещё» */
 window.openMoreMenu = function () {
   document.getElementById("more-menu")?.classList.add("show");
   document.getElementById("more-overlay")?.classList.add("show");
@@ -135,56 +133,38 @@ function calcNorm(user) {
 }
 
 /* ============================================================
-   4. ГЕНЕРАТОР ПЛАНА ТРЕНИРОВОК
+   4. ГЕНЕРАТОР ПЛАНА
    ============================================================ */
-
-/**
- * Считает параметры упражнения (подходы, повторы, отдых)
- * в зависимости от цели пользователя и его уровня
- */
 function calcExerciseParams(exercise, user) {
   const goal = user.goal;
   const level = state.level || "novice";
-
-  // Множители по цели
   const goalMod = {
     lose: { sets: 1, reps: 1.5, rest: 45 },
     gain: { sets: 1.5, reps: 0.7, rest: 90 },
     keep: { sets: 1.2, reps: 1, rest: 60 }
   };
-
-  // Множители по уровню
   const levelMod = {
     novice: { sets: 0.8, reps: 0.8 },
     middle: { sets: 1, reps: 1 },
     pro: { sets: 1.3, reps: 1.2 }
   };
-
   const gm = goalMod[goal] || goalMod.keep;
   const lm = levelMod[level] || levelMod.novice;
-
   const sets = Math.max(2, Math.round(exercise.baseSets * gm.sets * lm.sets));
   const reps = Math.max(4, Math.round(exercise.baseReps * gm.reps * lm.reps));
   const rest = gm.rest;
-
   return { sets, reps, rest, unit: exercise.unit };
 }
 
-/**
- * Генерирует план тренировок на неделю
- * Возвращает массив из 7 дней
- */
 function generateWorkoutPlan(user) {
   const template = WORKOUT_TEMPLATES[user.goal];
   if (!template) return null;
-
   const plan = {
     title: template.title,
     description: template.description,
     generatedAt: new Date().toISOString(),
     days: []
   };
-
   template.days.forEach(dayTemplate => {
     const day = {
       dayNum: dayTemplate.dayNum,
@@ -194,14 +174,10 @@ function generateWorkoutPlan(user) {
       isRest: dayTemplate.exercises.length === 0,
       exercises: []
     };
-
     dayTemplate.exercises.forEach(exId => {
       const ex = EXERCISES.find(e => e.id === exId);
       if (!ex) return;
-
-      // Фильтр по месту тренировки
       if (user.place === "home" && ex.place === "gym") {
-        // Домашний вариант зального упражнения
         const homeAlt = EXERCISES.find(e =>
           e.place === "any" && e.muscle === ex.muscle && e.type === ex.type
         );
@@ -211,7 +187,6 @@ function generateWorkoutPlan(user) {
         }
         return;
       }
-
       if (user.place === "street" && ex.place === "gym") {
         const streetAlt = EXERCISES.find(e =>
           (e.place === "street" || e.place === "any") &&
@@ -223,29 +198,16 @@ function generateWorkoutPlan(user) {
         }
         return;
       }
-
-      if (user.place === "gym" && ex.place === "any") {
-        // Для зальных пользователей можно предложить зальный вариант, но "any" тоже ок
-        const params = calcExerciseParams(ex, user);
-        day.exercises.push({ ...ex, ...params });
-        return;
-      }
-
       const params = calcExerciseParams(ex, user);
       day.exercises.push({ ...ex, ...params });
     });
-
     plan.days.push(day);
   });
-
   return plan;
 }
 
-/**
- * Возвращает сегодняшний день недели (0 = Пн, 6 = Вс)
- */
 function getTodayIndex() {
-  const d = new Date().getDay(); // 0 = Вс, 1 = Пн ...
+  const d = new Date().getDay();
   return d === 0 ? 6 : d - 1;
 }
 
@@ -254,21 +216,17 @@ function getTodayIndex() {
    ============================================================ */
 function renderMyPlan() {
   if (!state.user) return;
-
-  // Генерируем план, если его нет
   if (!state.workoutPlan) {
     state.workoutPlan = generateWorkoutPlan(state.user);
     saveLocal();
   }
-
   const box = document.getElementById("my-plan-content");
   if (!box) return;
-
   const todayIdx = getTodayIndex();
   const plan = state.workoutPlan;
 
   let html = `
-    <div class="card" style="background:linear-gradient(135deg,rgba(108,92,231,.15),rgba(0,210,168,.15))">
+    <div class="card" style="background:linear-gradient(135deg,rgba(168,85,247,.15),rgba(6,182,212,.1))">
       <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px">
         <div style="font-size:36px">🏋️</div>
         <div style="flex:1">
@@ -279,7 +237,7 @@ function renderMyPlan() {
       <p style="font-size:13px;color:var(--text-dim);margin-bottom:12px">${plan.description}</p>
       <div class="btn-row">
         <button class="btn small secondary" onclick="regeneratePlan()">🔄 Другой план</button>
-        <button class="btn small secondary" onclick="changeLevel()">🎯 Уровень: ${state.level === "novice" ? "Новичок" : state.level === "middle" ? "Средний" : "Продвинутый"}</button>
+        <button class="btn small secondary" onclick="changeLevel()">🎯 ${state.level === "novice" ? "Новичок" : state.level === "middle" ? "Средний" : "Продвинутый"}</button>
       </div>
     </div>
   `;
@@ -289,9 +247,9 @@ function renderMyPlan() {
     const doneKey = `${new Date().toISOString().slice(0,10)}_plan_${idx}`;
     const isDone = state.workoutLog[doneKey];
 
-    html += `<div class="card" style="${isToday ? "border:2px solid var(--accent);" : ""}">
+    html += `<div class="card" style="${isToday ? "border:2px solid var(--accent-1);box-shadow:0 0 30px rgba(168,85,247,.4);" : ""}">
       <div style="display:flex;align-items:center;gap:12px;margin-bottom:${day.exercises.length ? "14px" : "0"}">
-        <div style="width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:24px;background:${day.isRest ? "rgba(255,169,77,.15)" : "rgba(108,92,231,.15)"};flex-shrink:0">${day.icon}</div>
+        <div style="width:48px;height:48px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:24px;background:${day.isRest ? "rgba(251,146,60,.15)" : "linear-gradient(135deg,rgba(168,85,247,.25),rgba(6,182,212,.2))"};flex-shrink:0;border:1px solid rgba(255,255,255,.08)">${day.icon}</div>
         <div style="flex:1;min-width:0">
           <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
             <div style="font-weight:700;font-size:16px">${day.day}</div>
@@ -309,15 +267,17 @@ function renderMyPlan() {
           : ex.unit === "мин"
           ? `${ex.reps} мин`
           : `${ex.reps} раз`;
+        const setsText = ex.unit === "мин" ? "" : `<b>${ex.sets} подход${ex.sets === 1 ? "" : ex.sets < 5 ? "а" : "ов"}</b> × `;
 
-        html += `<div class="list-item" onclick="openExercise('${ex.id}')" style="cursor:pointer">
-          <div class="icon">${ex.icon}</div>
-          <div class="info">
-            <div class="title">${ex.name}</div>
-            <div class="sub">
-              ${ex.unit === "мин" ? "" : `<b>${ex.sets} подход${ex.sets === 1 ? "" : ex.sets < 5 ? "а" : "ов"}</b> × `}
-              <b>${repsText}</b>
-              ${ex.unit === "мин" ? "" : ` · отдых ${ex.rest} сек`}
+        html += `<div style="padding:12px;background:var(--bg-glass-light);border:1px solid rgba(255,255,255,.05);border-radius:14px;margin-bottom:8px">
+          <div style="display:flex;align-items:flex-start;gap:12px">
+            <div style="font-size:26px;flex-shrink:0">${ex.icon}</div>
+            <div style="flex:1;min-width:0">
+              <div style="font-weight:600;font-size:14px;margin-bottom:4px">${ex.name}</div>
+              <div style="font-size:13px;color:var(--text-dim);margin-bottom:6px">
+                ${setsText}${repsText}${ex.unit === "мин" ? "" : ` · отдых ${ex.rest} сек`}
+              </div>
+              <div style="font-size:12px;color:var(--text-mute);line-height:1.5">${ex.desc}</div>
             </div>
           </div>
         </div>`;
@@ -391,17 +351,14 @@ window.finishOnboarding = async function () {
   const activity = +document.getElementById("ob-activity").value;
   const place = document.getElementById("ob-place").value;
   const level = document.querySelector('input[name="ob-level"]:checked')?.value || "novice";
-  const daysPerWeek = +document.getElementById("ob-days")?.value || 3;
 
-  state.user = { name, sex, age, height, weight, goal, activity, place, daysPerWeek };
+  state.user = { name, sex, age, height, weight, goal, activity, place };
   state.level = level;
   state.norm = calcNorm(state.user);
   state.workoutPlan = generateWorkoutPlan(state.user);
   saveLocal();
-
   const u = getCurrentUser();
   if (u) await saveProfileToCloud(u.uid, state.user);
-
   document.getElementById("nav").classList.remove("hidden");
   showScreen("dashboard");
   toast("Профиль создан! 🚀", "ok");
@@ -424,10 +381,8 @@ window.editProfile = function () {
   document.querySelector(`input[name="ob-goal"][value="${state.user.goal}"]`).checked = true;
   document.getElementById("ob-activity").value = state.user.activity;
   document.getElementById("ob-place").value = state.user.place || "any";
-  const levelEl = document.querySelector(`input[name="ob-level"][value="${state.level}"]`);
-  if (levelEl) levelEl.checked = true;
-  const daysEl = document.getElementById("ob-days");
-  if (daysEl && state.user.daysPerWeek) daysEl.value = state.user.daysPerWeek;
+  const lvlEl = document.querySelector(`input[name="ob-level"][value="${state.level}"]`);
+  if (lvlEl) lvlEl.checked = true;
 };
 
 /* ============================================================
@@ -457,7 +412,7 @@ function renderTodayWorkout() {
 
   if (day.isRest) {
     box.innerHTML = `
-      <div class="card" style="background:linear-gradient(135deg,rgba(255,169,77,.15),rgba(255,107,107,.1))">
+      <div class="card" style="background:linear-gradient(135deg,rgba(251,146,60,.15),rgba(244,63,94,.1))">
         <div style="display:flex;align-items:center;gap:12px">
           <div style="font-size:40px">😴</div>
           <div style="flex:1">
@@ -485,7 +440,7 @@ function renderTodayWorkout() {
   }
 
   box.innerHTML = `
-    <div class="card" style="background:linear-gradient(135deg,rgba(108,92,231,.15),rgba(0,210,168,.1))">
+    <div class="card" style="background:linear-gradient(135deg,rgba(168,85,247,.15),rgba(6,182,212,.1))">
       <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
         <div style="font-size:40px">${day.icon}</div>
         <div style="flex:1">
@@ -517,57 +472,228 @@ function renderRing() {
   c.style.strokeDashoffset = -(pL + fL);
 }
 
+/* ============================================================
+   8. ГРАФИК ВЕСА — СТИЛЬ ДНС
+   ============================================================ */
 function renderWeightChart() {
   const cv = document.getElementById("weight-chart");
   const em = document.getElementById("weight-empty");
+  const info = document.getElementById("weight-info");
   if (!cv) return;
+
   if (!state.measurements.length) {
     cv.classList.add("hidden");
     em.classList.remove("hidden");
+    if (info) info.classList.add("hidden");
     return;
   }
+
   cv.classList.remove("hidden");
   em.classList.add("hidden");
+  if (info) info.classList.remove("hidden");
+
+  // Сортируем по дате
+  const sorted = [...state.measurements].sort((a, b) => new Date(a.date) - new Date(b.date));
+
+  // Инфо сверху
+  if (info) {
+    const first = sorted[0];
+    const last = sorted[sorted.length - 1];
+    const diff = (last.weight - first.weight).toFixed(1);
+    const diffClass = diff < 0 ? "ok" : diff > 0 ? "bad" : "warn";
+    const diffText = diff > 0 ? `+${diff}` : diff;
+
+    info.innerHTML = `
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:12px">
+        <div style="text-align:center;padding:10px;background:var(--bg-glass-light);border-radius:12px;border:1px solid rgba(255,255,255,.06)">
+          <div style="font-size:11px;color:var(--text-dim);text-transform:uppercase;letter-spacing:.5px">Старт</div>
+          <div style="font-weight:700;font-size:16px;margin-top:2px">${first.weight} кг</div>
+        </div>
+        <div style="text-align:center;padding:10px;background:var(--bg-glass-light);border-radius:12px;border:1px solid rgba(255,255,255,.06)">
+          <div style="font-size:11px;color:var(--text-dim);text-transform:uppercase;letter-spacing:.5px">Сейчас</div>
+          <div style="font-weight:700;font-size:16px;margin-top:2px">${last.weight} кг</div>
+        </div>
+        <div style="text-align:center;padding:10px;background:var(--bg-glass-light);border-radius:12px;border:1px solid rgba(255,255,255,.06)">
+          <div style="font-size:11px;color:var(--text-dim);text-transform:uppercase;letter-spacing:.5px">Разница</div>
+          <div class="badge ${diffClass}" style="margin-top:4px">${diffText} кг</div>
+        </div>
+      </div>`;
+  }
+
+  // Рисуем график
   const ctx = cv.getContext("2d");
   const dpr = window.devicePixelRatio || 1;
   const rect = cv.getBoundingClientRect();
-  cv.width = rect.width * dpr;
-  cv.height = 200 * dpr;
+  const W = rect.width;
+  const H = 240;
+
+  cv.width = W * dpr;
+  cv.height = H * dpr;
+  cv.style.height = H + "px";
   ctx.scale(dpr, dpr);
-  const W = rect.width, H = 200, pad = 30;
-  const data = state.measurements.slice(-20);
-  const ws = data.map(m => m.weight);
-  const minW = Math.min(...ws) - 2, maxW = Math.max(...ws) + 2, range = maxW - minW || 1;
-  ctx.clearRect(0, 0, W, H);
-  ctx.strokeStyle = "rgba(255,255,255,0.06)";
-  for (let i = 0; i <= 4; i++) {
-    const y = pad + (H - pad * 2) * (i / 4);
-    ctx.beginPath(); ctx.moveTo(pad, y); ctx.lineTo(W - pad, y); ctx.stroke();
-  }
-  const pts = data.map((m, i) => ({
-    x: pad + (W - pad * 2) * (i / Math.max(data.length - 1, 1)),
-    y: pad + (H - pad * 2) * (1 - (m.weight - minW) / range)
+
+  // Параметры
+  const padLeft = 44;    // место для шкалы значений
+  const padRight = 16;
+  const padTop = 24;
+  const padBottom = 40;  // место для дат
+
+  const chartW = W - padLeft - padRight;
+  const chartH = H - padTop - padBottom;
+
+  const weights = sorted.map(m => m.weight);
+  const minW = Math.min(...weights);
+  const maxW = Math.max(...weights);
+  const range = maxW - minW || 1;
+
+  // Отступы сверху/снизу для шкалы
+  const scaleMin = minW - range * 0.15;
+  const scaleMax = maxW + range * 0.15;
+  const scaleRange = scaleMax - scaleMin;
+
+  // X координаты точек
+  const points = sorted.map((m, i) => ({
+    x: padLeft + (chartW * i / Math.max(sorted.length - 1, 1)),
+    y: padTop + chartH * (1 - (m.weight - scaleMin) / scaleRange),
+    weight: m.weight,
+    date: m.date
   }));
-  const gr = ctx.createLinearGradient(0, pad, 0, H - pad);
-  gr.addColorStop(0, "rgba(108,92,231,0.4)");
-  gr.addColorStop(1, "rgba(108,92,231,0)");
-  ctx.beginPath();
-  ctx.moveTo(pts[0].x, H - pad);
-  pts.forEach(p => ctx.lineTo(p.x, p.y));
-  ctx.lineTo(pts[pts.length - 1].x, H - pad);
-  ctx.closePath();
-  ctx.fillStyle = gr; ctx.fill();
-  ctx.beginPath();
-  pts.forEach((p, i) => i === 0 ? ctx.moveTo(p.x, p.y) : ctx.lineTo(p.x, p.y));
-  ctx.strokeStyle = "#6c5ce7"; ctx.lineWidth = 3; ctx.lineJoin = "round"; ctx.stroke();
-  pts.forEach(p => {
-    ctx.beginPath(); ctx.arc(p.x, p.y, 4, 0, Math.PI * 2);
-    ctx.fillStyle = "#00d2a8"; ctx.fill();
+
+  // Очистка
+  ctx.clearRect(0, 0, W, H);
+
+  // === ГОРИЗОНТАЛЬНЫЕ ЛИНИИ + ШКАЛА СЛЕВА ===
+  const gridCount = 4;
+  for (let i = 0; i <= gridCount; i++) {
+    const value = scaleMax - (scaleRange * i / gridCount);
+    const y = padTop + chartH * (i / gridCount);
+
+    // Линия сетки
+    ctx.beginPath();
+    ctx.moveTo(padLeft, y);
+    ctx.lineTo(W - padRight, y);
+    ctx.strokeStyle = "rgba(255,255,255,.06)";
+    ctx.lineWidth = 1;
+    ctx.stroke();
+
+    // Подпись слева
+    ctx.fillStyle = "#a89ec9";
+    ctx.font = "11px -apple-system, sans-serif";
+    ctx.textAlign = "right";
+    ctx.textBaseline = "middle";
+    ctx.fillText(value.toFixed(1), padLeft - 8, y);
+  }
+
+  // === ЦВЕТ ЛИНИИ ===
+  // Если вес падает — зелёный, если растёт — красный, если стоит — фиолетовый
+  const totalDiff = points[points.length - 1].weight - points[0].weight;
+  let lineColorStart, lineColorEnd, pointColor;
+  if (totalDiff < -0.3) {
+    // Похудение — зелёный
+    lineColorStart = "#10b981";
+    lineColorEnd = "#06b6d4";
+    pointColor = "#10b981";
+  } else if (totalDiff > 0.3) {
+    // Набор массы — оранжевый/красный
+    lineColorStart = "#fb923c";
+    lineColorEnd = "#f43f5e";
+    pointColor = "#fb923c";
+  } else {
+    // Стабильно — фиолетовый
+    lineColorStart = "#a855f7";
+    lineColorEnd = "#06b6d4";
+    pointColor = "#a855f7";
+  }
+
+  // === ГРАДИЕНТНАЯ ЛИНИЯ ===
+  const lineGrad = ctx.createLinearGradient(padLeft, 0, W - padRight, 0);
+  lineGrad.addColorStop(0, lineColorStart);
+  lineGrad.addColorStop(1, lineColorEnd);
+
+  // Плавная линия (Безье)
+  if (points.length >= 2) {
+    ctx.beginPath();
+    ctx.moveTo(points[0].x, points[0].y);
+    for (let i = 1; i < points.length; i++) {
+      const prev = points[i - 1];
+      const curr = points[i];
+      const cpX = (prev.x + curr.x) / 2;
+      ctx.bezierCurveTo(cpX, prev.y, cpX, curr.y, curr.x, curr.y);
+    }
+    ctx.strokeStyle = lineGrad;
+    ctx.lineWidth = 3;
+    ctx.lineCap = "round";
+    ctx.lineJoin = "round";
+    ctx.stroke();
+
+    // === ГРАДИЕНТНАЯ ЗАЛИВКА ПОД ЛИНИЕЙ ===
+    const fillGrad = ctx.createLinearGradient(0, padTop, 0, H - padBottom);
+    fillGrad.addColorStop(0, lineColorStart + "44");
+    fillGrad.addColorStop(1, lineColorStart + "00");
+    ctx.beginPath();
+    ctx.moveTo(points[0].x, H - padBottom);
+    ctx.lineTo(points[0].x, points[0].y);
+    for (let i = 1; i < points.length; i++) {
+      const prev = points[i - 1];
+      const curr = points[i];
+      const cpX = (prev.x + curr.x) / 2;
+      ctx.bezierCurveTo(cpX, prev.y, cpX, curr.y, curr.x, curr.y);
+    }
+    ctx.lineTo(points[points.length - 1].x, H - padBottom);
+    ctx.closePath();
+    ctx.fillStyle = fillGrad;
+    ctx.fill();
+  } else if (points.length === 1) {
+    // Одна точка — просто линия
+    ctx.beginPath();
+    ctx.arc(points[0].x, points[0].y, 6, 0, Math.PI * 2);
+    ctx.fillStyle = pointColor;
+    ctx.fill();
+  }
+
+  // === ТОЧКИ ===
+  points.forEach((p, i) => {
+    // Свечение
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, 10, 0, Math.PI * 2);
+    ctx.fillStyle = pointColor + "22";
+    ctx.fill();
+
+    // Белая обводка
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, 6, 0, Math.PI * 2);
+    ctx.fillStyle = "#fff";
+    ctx.fill();
+
+    // Внутренний цветной круг
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, 4, 0, Math.PI * 2);
+    ctx.fillStyle = pointColor;
+    ctx.fill();
+
+    // Подпись веса над точкой (только для первой, последней и если точек мало)
+    const showLabel = i === 0 || i === points.length - 1 || points.length <= 5;
+    if (showLabel) {
+      ctx.fillStyle = "#f5f3ff";
+      ctx.font = "bold 11px -apple-system, sans-serif";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "bottom";
+      ctx.fillText(p.weight.toFixed(1), p.x, p.y - 12);
+    }
+
+    // Дата снизу
+    const d = new Date(p.date);
+    const dateStr = d.toLocaleDateString("ru-RU", { day: "numeric", month: "short" });
+    ctx.fillStyle = "#6b6490";
+    ctx.font = "10px -apple-system, sans-serif";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "top";
+    ctx.fillText(dateStr, p.x, H - padBottom + 8);
   });
 }
 
 /* ============================================================
-   8. РАЦИОН
+   9. РАЦИОН
    ============================================================ */
 function generateMealPlan(shuffle = false) {
   if (!state.norm) return;
@@ -626,7 +752,7 @@ function pickRecipe(meal, target, goal, slot) {
 }
 
 /* ============================================================
-   9. РЕЦЕПТЫ
+   10. РЕЦЕПТЫ
    ============================================================ */
 function renderRecipeList() {
   const chips = document.getElementById("recipe-chips");
@@ -685,39 +811,6 @@ window.openRecipe = function (id) {
     </div>`;
   showScreen("recipe");
 };
-
-/* ============================================================
-   10. ТРЕНИРОВКИ (старый экран, оставлен для совместимости)
-   ============================================================ */
-function renderWorkout() {
-  if (!state.user) return;
-  // Сразу перекидываем на новый экран «Мой план»
-  showScreen("my-plan");
-}
-
-let timerInt = null, timerSec = 0, timerRun = false;
-window.toggleTimer = function () {
-  const b = document.getElementById("timer-start");
-  if (!b) return;
-  if (timerRun) {
-    clearInterval(timerInt); timerRun = false; b.textContent = "▶ Продолжить";
-  } else {
-    timerRun = true; b.textContent = "⏸ Пауза";
-    timerInt = setInterval(() => { timerSec++; updTimer(); }, 1000);
-  }
-};
-window.resetTimer = function () {
-  clearInterval(timerInt); timerRun = false; timerSec = 0;
-  updTimer();
-  const b = document.getElementById("timer-start");
-  if (b) b.textContent = "▶ Старт";
-};
-function updTimer() {
-  const m = String(Math.floor(timerSec / 60)).padStart(2, "0");
-  const s = String(timerSec % 60).padStart(2, "0");
-  const d = document.getElementById("timer-display");
-  if (d) d.textContent = `${m}:${s}`;
-}
 
 /* ============================================================
    11. УПРАЖНЕНИЯ
@@ -798,6 +891,7 @@ window.saveMeasurement = async function () {
   }
   ["m-weight", "m-chest", "m-waist", "m-hips", "m-arm"].forEach(id => document.getElementById(id).value = "");
   renderMeasurements();
+  renderWeightChart();
   toast("Замер сохранён 📏", "ok");
 };
 
@@ -1243,7 +1337,7 @@ window.doLogout = async function () {
 };
 
 /* ============================================================
-   17. ЗАГРУЗКА ПОСЛЕ ВХОДА
+   17. ПОСЛЕ ВХОДА
    ============================================================ */
 async function afterLogin(fbUser) {
   state.fbUser = fbUser;
@@ -1304,7 +1398,7 @@ window.installApp = function () {
   } else {
     const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
     if (isIOS) {
-      alert("📲 Установка на iPhone:\n\n1. Нажми «Поделиться» (квадрат со стрелкой)\n2. Пролистай → «На экран Домой»\n3. «Добавить»");
+      alert("📲 Установка на iPhone:\n\n1. Нажми «Поделиться»\n2. Пролистай → «На экран Домой»\n3. «Добавить»");
     } else {
       alert("📲 Установка:\n\n1. Меню браузера (⋮)\n2. «Установить приложение»\n3. Подтверди");
     }
@@ -1369,4 +1463,4 @@ window.toast = toast;
 
 document.addEventListener("DOMContentLoaded", init);
 
-console.log("✅ app.js v3.0 (генератор плана) загружен");
+console.log("✅ app.js v4.0 (график + описания) загружен");
