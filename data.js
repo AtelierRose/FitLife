@@ -1,16 +1,10 @@
 /* ============================================================
    FitLife — база данных
-   Версия: 3.0 (с типами упражнений для авто-плана)
+   Версия: 3.3 (доступные упражнения + описания)
    Файл: data.js
    ============================================================ */
 
-/* ============================================================
-   1. ПРОДУКТЫ (КБЖУ на 100 г)
-   Категории: grain, meat, fish, dairy, egg, veg, fruit,
-              fat, semi, sauce, sweet, drink, fast, sport
-   ============================================================ */
 const PRODUCTS = [
-/* ---------- КРУПЫ И ЗЛАКИ ---------- */
 {name:"Овсянка (сухая)",cal:352,p:12.3,f:6.1,c:59.5,cat:"grain"},
 {name:"Овсянка (варёная на воде)",cal:88,p:3,f:1.7,c:15,cat:"grain"},
 {name:"Геркулес",cal:352,p:12.3,f:6.1,c:59.5,cat:"grain"},
@@ -46,7 +40,6 @@ const PRODUCTS = [
 {name:"Лаваш армянский",cal:236,p:8,f:0.8,c:48,cat:"grain"},
 {name:"Хлебцы ржаные",cal:310,p:10,f:2,c:60,cat:"grain"},
 
-/* ---------- МЯСО ---------- */
 {name:"Куриная грудка сырая",cal:165,p:31,f:3.6,c:0,cat:"meat"},
 {name:"Куриная грудка варёная",cal:137,p:29,f:1.8,c:0,cat:"meat"},
 {name:"Куриная грудка запечённая",cal:150,p:30,f:2,c:0,cat:"meat"},
@@ -70,7 +63,6 @@ const PRODUCTS = [
 {name:"Утка",cal:337,p:16,f:30,c:0,cat:"meat"},
 {name:"Утиная грудка",cal:200,p:24,f:11,c:0,cat:"meat"},
 
-/* ---------- КОЛБАСЫ ---------- */
 {name:"Сосиски молочные",cal:266,p:11,f:24,c:1.6,cat:"semi"},
 {name:"Сосиски куриные",cal:230,p:13,f:19,c:2,cat:"semi"},
 {name:"Сардельки",cal:285,p:11,f:26,c:2,cat:"semi"},
@@ -93,7 +85,6 @@ const PRODUCTS = [
 {name:"Хот-дог",cal:290,p:10,f:17,c:24,cat:"semi"},
 {name:"Гамбургер",cal:295,p:13,f:14,c:30,cat:"semi"},
 
-/* ---------- РЫБА ---------- */
 {name:"Скумбрия",cal:191,p:18,f:13.2,c:0,cat:"fish"},
 {name:"Сельдь",cal:248,p:17,f:19,c:0,cat:"fish"},
 {name:"Минтай",cal:72,p:16,f:0.9,c:0,cat:"fish"},
@@ -119,7 +110,6 @@ const PRODUCTS = [
 {name:"Икра красная",cal:251,p:24,f:17,c:4,cat:"fish"},
 {name:"Морская капуста",cal:5,p:0.9,f:0.2,c:0.4,cat:"fish"},
 
-/* ---------- МОЛОЧКА ---------- */
 {name:"Молоко 1%",cal:42,p:3.4,f:1,c:4.8,cat:"dairy"},
 {name:"Молоко 2.5%",cal:52,p:2.9,f:2.5,c:4.7,cat:"dairy"},
 {name:"Молоко 3.2%",cal:60,p:2.8,f:3.2,c:4.7,cat:"dairy"},
@@ -161,7 +151,6 @@ const PRODUCTS = [
 {name:"Масло сливочное 82.5%",cal:748,p:0.6,f:82.5,c:0.8,cat:"dairy"},
 {name:"Сгущённое молоко",cal:320,p:7.2,f:8.5,c:56,cat:"dairy"},
 
-/* ---------- ЯЙЦА ---------- */
 {name:"Яйцо куриное",cal:155,p:12.7,f:11.5,c:0.7,cat:"egg"},
 {name:"Яичный белок",cal:52,p:11,f:0.2,c:0.7,cat:"egg"},
 {name:"Яичный желток",cal:352,p:16,f:30,c:3,cat:"egg"},
@@ -169,7 +158,6 @@ const PRODUCTS = [
 {name:"Яичница",cal:232,p:12,f:20,c:1,cat:"egg"},
 {name:"Омлет",cal:184,p:11,f:14,c:2,cat:"egg"},
 
-/* ---------- ОВОЩИ ---------- */
 {name:"Капуста белокочанная",cal:28,p:1.8,f:0.1,c:4.7,cat:"veg"},
 {name:"Капуста краснокочанная",cal:31,p:1.4,f:0.2,c:6.5,cat:"veg"},
 {name:"Капуста цветная",cal:25,p:1.9,f:0.3,c:4.2,cat:"veg"},
@@ -207,7 +195,6 @@ const PRODUCTS = [
 {name:"Грибы вешенки",cal:33,p:3.3,f:0.4,c:6.1,cat:"veg"},
 {name:"Квашеная капуста",cal:23,p:1.8,f:0.1,c:3,cat:"veg"},
 
-/* ---------- ФРУКТЫ ---------- */
 {name:"Банан",cal:89,p:1.1,f:0.3,c:22.8,cat:"fruit"},
 {name:"Яблоко",cal:52,p:0.3,f:0.2,c:13.8,cat:"fruit"},
 {name:"Апельсин",cal:47,p:0.9,f:0.1,c:11.8,cat:"fruit"},
@@ -241,7 +228,6 @@ const PRODUCTS = [
 {name:"Чернослив",cal:240,p:2.3,f:0.7,c:64,cat:"fruit"},
 {name:"Финики",cal:282,p:2.5,f:0.4,c:75,cat:"fruit"},
 
-/* ---------- ОРЕХИ, МАСЛА ---------- */
 {name:"Арахис",cal:567,p:25.8,f:49.2,c:16.1,cat:"fat"},
 {name:"Арахисовая паста",cal:588,p:25,f:50,c:20,cat:"fat"},
 {name:"Грецкий орех",cal:654,p:15.2,f:65.2,c:13.7,cat:"fat"},
@@ -258,7 +244,6 @@ const PRODUCTS = [
 {name:"Масло подсолнечное",cal:884,p:0,f:100,c:0,cat:"fat"},
 {name:"Масло оливковое",cal:884,p:0,f:100,c:0,cat:"fat"},
 
-/* ---------- СЛАДКОЕ ---------- */
 {name:"Мёд",cal:304,p:0.3,f:0,c:82.4,cat:"sweet"},
 {name:"Сахар",cal:387,p:0,f:0,c:99.8,cat:"sweet"},
 {name:"Шоколад молочный",cal:535,p:7.6,f:29.7,c:59.4,cat:"sweet"},
@@ -276,7 +261,6 @@ const PRODUCTS = [
 {name:"Чизкейк",cal:321,p:6,f:22,c:25,cat:"sweet"},
 {name:"Тирамису",cal:290,p:5,f:20,c:22,cat:"sweet"},
 
-/* ---------- СНЕКИ, ФАСТФУД ---------- */
 {name:"Чипсы Lays",cal:510,p:6,f:30,c:53,cat:"fast"},
 {name:"Чипсы Pringles",cal:536,p:4.5,f:33,c:52,cat:"fast"},
 {name:"Сухарики",cal:400,p:8,f:12,c:66,cat:"fast"},
@@ -292,7 +276,6 @@ const PRODUCTS = [
 {name:"Суши Филадельфия",cal:170,p:6,f:6,c:22,cat:"fast"},
 {name:"Роллы Калифорния",cal:150,p:5,f:4,c:24,cat:"fast"},
 
-/* ---------- СОУСЫ ---------- */
 {name:"Кетчуп",cal:97,p:1.8,f:0.1,c:22.2,cat:"sauce"},
 {name:"Майонез",cal:680,p:1,f:75,c:3,cat:"sauce"},
 {name:"Майонез лёгкий",cal:280,p:1,f:30,c:3,cat:"sauce"},
@@ -305,7 +288,6 @@ const PRODUCTS = [
 {name:"Песто",cal:450,p:5,f:45,c:6,cat:"sauce"},
 {name:"Цезарь соус",cal:480,p:2,f:50,c:5,cat:"sauce"},
 
-/* ---------- НАПИТКИ ---------- */
 {name:"Кола",cal:42,p:0,f:0,c:10.6,cat:"drink"},
 {name:"Кола Zero",cal:0.4,p:0,f:0,c:0,cat:"drink"},
 {name:"Пепси",cal:41,p:0,f:0,c:10.4,cat:"drink"},
@@ -331,7 +313,6 @@ const PRODUCTS = [
 {name:"Вино белое сухое",cal:82,p:0.1,f:0,c:2.6,cat:"drink"},
 {name:"Протеиновый коктейль",cal:110,p:24,f:1.5,c:2,cat:"drink"},
 
-/* ---------- СПОРТПИТ ---------- */
 {name:"Протеин whey",cal:380,p:75,f:5,c:8,cat:"sport"},
 {name:"Протеин изолят",cal:370,p:85,f:2,c:3,cat:"sport"},
 {name:"Казеин",cal:360,p:75,f:2,c:10,cat:"sport"},
@@ -343,7 +324,6 @@ const PRODUCTS = [
    2. РЕЦЕПТЫ
    ============================================================ */
 const RECIPES = [
-/* ---------- ЗАВТРАКИ ---------- */
 {id:"b1",meal:"breakfast",name:"Овсянка с бананом",icon:"🥣",cal:380,p:13,f:8,c:65,servings:1,
 ingredients:[{n:"Овсяные хлопья",q:"60 г"},{n:"Банан",q:"1 шт"},{n:"Вода",q:"200 мл"},{n:"Семена льна",q:"1 ч.л."}],
 steps:["Налей воду, доведи до кипения.","Добавь овсянку и соль.","Вари 5–7 минут.","Добавь банан и семена льна."]},
@@ -387,7 +367,6 @@ steps:["Залей крупу молоком.","Вари 25 мин.","Добав
 ingredients:[{n:"Крупа кукурузная",q:"60 г"},{n:"Молоко",q:"200 мл"},{n:"Сыр",q:"30 г"}],
 steps:["Вари крупу 15 мин.","Добавь сыр.","Перемешай."]},
 
-/* ---------- ОБЕДЫ ---------- */
 {id:"l1",meal:"lunch",name:"Гречка с куриной грудкой и салатом",icon:"🍗",cal:520,p:42,f:12,c:55,servings:1,
 ingredients:[{n:"Гречка",q:"80 г"},{n:"Куриная грудка",q:"150 г"},{n:"Капуста",q:"100 г"},{n:"Огурец",q:"1 шт"}],
 steps:["Отвари гречку.","Обжарь курицу.","Нашинкуй салат.","Подай всё вместе."]},
@@ -425,7 +404,6 @@ steps:["Обмакни курицу в яйцо и муку.","Обжарь по
 ingredients:[{n:"Рис",q:"70 г"},{n:"Яйца",q:"2 шт"},{n:"Овощи",q:"150 г"}],
 steps:["Отвари рис.","Обжарь овощи.","Добавь яйца.","Смешай с рисом."]},
 
-/* ---------- УЖИНЫ ---------- */
 {id:"d1",meal:"dinner",name:"Запечённая скумбрия с овощами",icon:"🐠",cal:420,p:32,f:22,c:20,servings:1,
 ingredients:[{n:"Скумбрия",q:"200 г"},{n:"Овощи",q:"200 г"},{n:"Лимон",q:"0.5 шт"}],
 steps:["Разогрей духовку 200°C.","Посоли рыбу.","Выложи с овощами.","Запекай 25 мин."]},
@@ -463,7 +441,6 @@ steps:["Обжарь грибы.","Добавь рис.","Вливай буль�
 ingredients:[{n:"Кальмары",q:"200 г"},{n:"Сметана",q:"50 г"},{n:"Лук",q:"0.5 шт"}],
 steps:["Обжарь лук.","Добавь кальмары.","Добавь сметану.","Туши 2 мин."]},
 
-/* ---------- ПЕРЕКУСЫ ---------- */
 {id:"s1",meal:"snack",name:"Творог с бананом",icon:"🍌",cal:220,p:20,f:6,c:22,servings:1,
 ingredients:[{n:"Творог",q:"150 г"},{n:"Банан",q:"1 шт"}],
 steps:["Смешай всё."]},
@@ -501,7 +478,6 @@ steps:["Смешай всё.","Взбей блендером."]},
 ingredients:[{n:"Кефир",q:"200 мл"},{n:"Чиа",q:"10 г"}],
 steps:["Добавь чиа в кефир.","Дай постоять 15 мин."]},
 
-/* ---------- СУПЫ ---------- */
 {id:"sp1",meal:"soup",name:"Куриный бульон с овощами",icon:"🍲",cal:180,p:18,f:6,c:12,servings:1,
 ingredients:[{n:"Куриная грудка",q:"150 г"},{n:"Морковь",q:"1 шт"},{n:"Сельдерей",q:"1 стебель"}],
 steps:["Залей курицу водой.","Доведи до кипения.","Вари 40 мин.","Процеди."]},
@@ -524,7 +500,6 @@ steps:["Замочи горох.","Вари с курицей 1 ч.","Добав
 ingredients:[{n:"Помидоры",q:"400 г"},{n:"Огурец",q:"1 шт"},{n:"Перец",q:"0.5 шт"}],
 steps:["Пробей овощи в блендере.","Добавь масло.","Охлади."]},
 
-/* ---------- СМУЗИ ---------- */
 {id:"sm1",meal:"smoothie",name:"Зелёный смузи",icon:"🥬",cal:180,p:8,f:5,c:28,servings:1,
 ingredients:[{n:"Шпинат",q:"50 г"},{n:"Банан",q:"1 шт"},{n:"Яблоко",q:"1 шт"}],
 steps:["Всё в блендер.","Взбей 30 сек."]},
@@ -543,118 +518,103 @@ steps:["Всё в блендер.","Взбей."]}
 ];
 
 /* ============================================================
-   3. УПРАЖНЕНИЯ (с типами для авто-плана)
-   Поля:
-   - type: strength / cardio / isometric / abs / functional
-   - baseSets: базовое число подходов (для strength/abs)
-   - baseReps: базовое число повторов/секунд/минут
-   - unit: "раз" / "сек" / "мин"
+   3. УПРАЖНЕНИЯ — только доступные всем
+   (без плавания, велотренажёров, гребных, гирь и т.п.)
    ============================================================ */
 const EXERCISES = [
-/* ---------- ГРУДЬ ---------- */
-{id:"c1",name:"Отжимания от пола",icon:"💪",place:"any",muscle:"Грудь",type:"strength",baseSets:3,baseReps:12,unit:"раз",desc:"Упор лёжа, руки шире плеч. Опускайся до касания грудью пола."},
-{id:"c2",name:"Отжимания с колен",icon:"💪",place:"any",muscle:"Грудь",type:"strength",baseSets:3,baseReps:10,unit:"раз",desc:"Облегчённый вариант для новичков."},
-{id:"c3",name:"Алмазные отжимания",icon:"💎",place:"any",muscle:"Грудь, трицепс",type:"strength",baseSets:3,baseReps:8,unit:"раз",desc:"Руки вместе, образуют ромб."},
-{id:"c4",name:"Отжимания широким хватом",icon:"🦅",place:"any",muscle:"Грудь",type:"strength",baseSets:3,baseReps:10,unit:"раз",desc:"Руки максимально широко."},
-{id:"c5",name:"Отжимания на брусьях",icon:"🏋️",place:"street",muscle:"Грудь, трицепс",type:"strength",baseSets:3,baseReps:8,unit:"раз",desc:"Корпус вертикально — трицепс, с наклоном — грудь."},
-{id:"c6",name:"Жим штанги лёжа",icon:"🏋️",place:"gym",muscle:"Грудь",type:"strength",baseSets:4,baseReps:8,unit:"раз",desc:"Хват чуть шире плеч."},
-{id:"c7",name:"Жим гантелей лёжа",icon:"🏋️",place:"gym",muscle:"Грудь",type:"strength",baseSets:4,baseReps:10,unit:"раз",desc:"Локти 45°."},
-{id:"c8",name:"Разводка гантелей лёжа",icon:"🦋",place:"gym",muscle:"Грудь",type:"strength",baseSets:3,baseReps:12,unit:"раз",desc:"Медленно разводи и своди."},
-{id:"c9",name:"Жим в тренажёре",icon:"🏋️",place:"gym",muscle:"Грудь",type:"strength",baseSets:4,baseReps:10,unit:"раз",desc:"Безопасная альтернатива."},
-{id:"c10",name:"Кроссовер в блоке",icon:"✖️",place:"gym",muscle:"Грудь",type:"strength",baseSets:3,baseReps:15,unit:"раз",desc:"Своди руки перед собой."},
-{id:"c11",name:"Отжимания с хлопком",icon:"👏",place:"any",muscle:"Грудь",type:"strength",baseSets:3,baseReps:6,unit:"раз",desc:"Продвинутый уровень."},
+/* ГРУДЬ */
+{id:"c1",name:"Отжимания от пола",icon:"💪",place:"any",muscle:"Грудь",type:"strength",baseSets:3,baseReps:12,unit:"раз",desc:"Упор лёжа, руки шире плеч. Опускайся до касания грудью пола. Спина прямая, не прогибайся. Если тяжело — начни с колен."},
+{id:"c2",name:"Отжимания с колен",icon:"💪",place:"any",muscle:"Грудь",type:"strength",baseSets:3,baseReps:10,unit:"раз",desc:"То же, что обычные отжимания, но с опорой на колени. Легче для новичков. Медленно опускайся, локти не разводи в стороны."},
+{id:"c3",name:"Алмазные отжимания",icon:"💎",place:"any",muscle:"Грудь, трицепс",type:"strength",baseSets:3,baseReps:8,unit:"раз",desc:"Руки вместе перед грудью — большие и указательные пальцы касаются, образуя ромб. Опускайся медленно, локти прижаты к корпусу."},
+{id:"c4",name:"Отжимания широким хватом",icon:"🦅",place:"any",muscle:"Грудь",type:"strength",baseSets:3,baseReps:10,unit:"раз",desc:"Руки на максимальной ширине. Акцент на внешнюю часть грудных мышц. Опускайся до параллели с полом."},
+{id:"c5",name:"Отжимания на брусьях",icon:"🏋️",place:"street",muscle:"Грудь, трицепс",type:"strength",baseSets:3,baseReps:8,unit:"раз",desc:"Держись на брусьях. Корпус прямо — акцент на трицепс, с наклоном вперёд — на грудь. Опускайся до 90° в локтях."},
+{id:"c6",name:"Жим штанги лёжа",icon:"🏋️",place:"gym",muscle:"Грудь",type:"strength",baseSets:4,baseReps:8,unit:"раз",desc:"Лёжа на скамье, хват чуть шире плеч. Опускай штангу до касания груди, выжимай вверх без отбива. Спина слегка прогнута, стопы на полу."},
+{id:"c7",name:"Жим гантелей лёжа",icon:"🏋️",place:"gym",muscle:"Грудь",type:"strength",baseSets:4,baseReps:10,unit:"раз",desc:"Лёжа, гантели в руках. Опускай до уровня груди, локти под 45° к корпусу. Вверху не своди гантели полностью."},
+{id:"c8",name:"Разводка гантелей лёжа",icon:"🦋",place:"gym",muscle:"Грудь",type:"strength",baseSets:3,baseReps:12,unit:"раз",desc:"Лёжа, руки чуть согнуты. Разводи гантели в стороны до уровня груди, затем медленно своди. Растягивает грудные мышцы."},
+{id:"c9",name:"Жим в тренажёре",icon:"🏋️",place:"gym",muscle:"Грудь",type:"strength",baseSets:4,baseReps:10,unit:"раз",desc:"Сядь в тренажёр, отрегулируй сиденье. Толкай рукоятки вперёд, не выпрямляя локти до конца. Безопасная альтернатива жиму штанги."},
+{id:"c10",name:"Кроссовер в блоке",icon:"✖️",place:"gym",muscle:"Грудь",type:"strength",baseSets:3,baseReps:15,unit:"раз",desc:"Стоя между блоками, рукоятки в руках. Своди руки перед собой, локти чуть согнуты. В конце движения — задержись на секунду."},
 
-/* ---------- СПИНА ---------- */
-{id:"b1",name:"Подтягивания",icon:"🧲",place:"street",muscle:"Спина",type:"strength",baseSets:4,baseReps:8,unit:"раз",desc:"Хват шире плеч."},
-{id:"b2",name:"Подтягивания обратным хватом",icon:"🔄",place:"street",muscle:"Спина, бицепс",type:"strength",baseSets:3,baseReps:8,unit:"раз",desc:"Узкий обратный хват."},
-{id:"b3",name:"Австралийские подтягивания",icon:"🏗️",place:"street",muscle:"Спина",type:"strength",baseSets:3,baseReps:12,unit:"раз",desc:"Под низкой перекладиной."},
-{id:"b4",name:"Тяга штанги в наклоне",icon:"🏋️",place:"gym",muscle:"Спина",type:"strength",baseSets:4,baseReps:8,unit:"раз",desc:"Корпус под 45°."},
-{id:"b5",name:"Тяга гантели одной рукой",icon:"🏋️",place:"gym",muscle:"Спина",type:"strength",baseSets:3,baseReps:10,unit:"раз",desc:"Опора на скамью."},
-{id:"b6",name:"Становая тяга",icon:"⚡",place:"gym",muscle:"Спина, ноги",type:"strength",baseSets:4,baseReps:6,unit:"раз",desc:"Спина прямая."},
-{id:"b7",name:"Гиперэкстензия",icon:"🌉",place:"gym",muscle:"Поясница",type:"strength",baseSets:3,baseReps:15,unit:"раз",desc:"Плавно вверх-вниз."},
-{id:"b8",name:"Тяга верхнего блока",icon:"⛓️",place:"gym",muscle:"Спина",type:"strength",baseSets:4,baseReps:10,unit:"раз",desc:"Тяни к груди."},
-{id:"b9",name:"Тяга нижнего блока",icon:"⛓️",place:"gym",muscle:"Спина",type:"strength",baseSets:4,baseReps:10,unit:"раз",desc:"Тяни к поясу."},
-{id:"b10",name:"Шраги с гантелями",icon:"🤷",place:"gym",muscle:"Трапеции",type:"strength",baseSets:3,baseReps:15,unit:"раз",desc:"Поднимай плечи вверх."},
+/* СПИНА */
+{id:"b1",name:"Подтягивания",icon:"🧲",place:"street",muscle:"Спина",type:"strength",baseSets:4,baseReps:8,unit:"раз",desc:"Хват шире плеч, тянись грудью к перекладине. Внизу полностью выпрямляй руки. Не раскачивайся. Если тяжело — используй резинку или попроси поддержку."},
+{id:"b2",name:"Подтягивания обратным хватом",icon:"🔄",place:"street",muscle:"Спина, бицепс",type:"strength",baseSets:3,baseReps:8,unit:"раз",desc:"Узкий обратный хват (ладони к себе). Больше нагрузки на бицепс и низ широчайших. Локти прижимай к корпусу."},
+{id:"b3",name:"Австралийские подтягивания",icon:"🏗️",place:"street",muscle:"Спина",type:"strength",baseSets:3,baseReps:12,unit:"раз",desc:"Под низкой перекладиной, тело прямое (пятки на полу). Тянись грудью к перекладине. Легче обычных подтягиваний."},
+{id:"b4",name:"Тяга штанги в наклоне",icon:"🏋️",place:"gym",muscle:"Спина",type:"strength",baseSets:4,baseReps:8,unit:"раз",desc:"Наклонись под 45°, спина прямая. Тяни штангу к поясу, сводя лопатки. Не помогай корпусом."},
+{id:"b5",name:"Тяга гантели одной рукой",icon:"🏋️",place:"gym",muscle:"Спина",type:"strength",baseSets:3,baseReps:10,unit:"раз",desc:"Опора одной рукой на скамью, гантель в другой. Тяни гантель к поясу, локоть вверх. Спина прямая, не скругляй."},
+{id:"b6",name:"Становая тяга",icon:"⚡",place:"gym",muscle:"Спина, ноги",type:"strength",baseSets:4,baseReps:6,unit:"раз",desc:"Штанга у голени, спина прямая. Поднимай ногами и спиной одновременно. Вверху не прогибайся назад. Опускай контролируя."},
+{id:"b7",name:"Гиперэкстензия",icon:"🌉",place:"gym",muscle:"Поясница",type:"strength",baseSets:3,baseReps:15,unit:"раз",desc:"На римском стуле. Плавно поднимай корпус, не переразгибайся. Работает поясница и ягодицы."},
+{id:"b8",name:"Тяга верхнего блока",icon:"⛓️",place:"gym",muscle:"Спина",type:"strength",baseSets:4,baseReps:10,unit:"раз",desc:"Сидя, тяни рукоятку к груди (не к животу!). Локти идут вниз и назад. Плавно возвращай."},
+{id:"b9",name:"Тяга нижнего блока",icon:"⛓️",place:"gym",muscle:"Спина",type:"strength",baseSets:4,baseReps:10,unit:"раз",desc:"Сидя, ноги упираются в упор. Тяни рукоятку к поясу, сводя лопатки. Не раскачивайся."},
+{id:"b10",name:"Шраги с гантелями",icon:"🤷",place:"gym",muscle:"Трапеции",type:"strength",baseSets:3,baseReps:15,unit:"раз",desc:"Гантели в руках вдоль тела. Поднимай плечи вверх, не вращай. Задержись на секунду вверху."},
 
-/* ---------- НОГИ ---------- */
-{id:"l1",name:"Приседания",icon:"🦵",place:"any",muscle:"Ноги, ягодицы",type:"strength",baseSets:4,baseReps:15,unit:"раз",desc:"Стопы шире плеч."},
-{id:"l2",name:"Выпады вперёд",icon:"🚶",place:"any",muscle:"Ноги",type:"strength",baseSets:3,baseReps:12,unit:"раз",desc:"Шаг вперёд."},
-{id:"l3",name:"Болгарские выпады",icon:"🪑",place:"any",muscle:"Ноги",type:"strength",baseSets:3,baseReps:10,unit:"раз",desc:"Задняя нога на возвышении."},
-{id:"l4",name:"Румынская тяга",icon:"🏋️",place:"gym",muscle:"Задняя поверхность бедра",type:"strength",baseSets:4,baseReps:10,unit:"раз",desc:"Колени чуть согнуты."},
-{id:"l5",name:"Приседания со штангой",icon:"🏋️",place:"gym",muscle:"Ноги",type:"strength",baseSets:4,baseReps:8,unit:"раз",desc:"Штанга на плечах."},
-{id:"l6",name:"Жим ногами",icon:"🦵",place:"gym",muscle:"Ноги",type:"strength",baseSets:4,baseReps:12,unit:"раз",desc:"Не выпрямляй колени до конца."},
-{id:"l7",name:"Подъёмы на носки",icon:"🦶",place:"any",muscle:"Икры",type:"strength",baseSets:4,baseReps:20,unit:"раз",desc:"Задержись на секунду вверху."},
-{id:"l8",name:"Приседания плие",icon:"🩰",place:"any",muscle:"Ягодицы",type:"strength",baseSets:3,baseReps:15,unit:"раз",desc:"Стопы широко."},
-{id:"l9",name:"Ягодичный мост",icon:"🌉",place:"any",muscle:"Ягодицы",type:"strength",baseSets:3,baseReps:20,unit:"раз",desc:"Поднимай таз вверх."},
-{id:"l10",name:"Разгибания ног в тренажёре",icon:"🦵",place:"gym",muscle:"Квадрицепс",type:"strength",baseSets:3,baseReps:15,unit:"раз",desc:"Выпрямляй ноги."},
-{id:"l11",name:"Сгибания ног в тренажёре",icon:"🦵",place:"gym",muscle:"Бицепс бедра",type:"strength",baseSets:3,baseReps:15,unit:"раз",desc:"Сгибай ноги."},
-{id:"l12",name:"Зашагивания на платформу",icon:"🪜",place:"gym",muscle:"Ноги",type:"strength",baseSets:3,baseReps:12,unit:"раз",desc:"Зашагивай поочерёдно."},
-{id:"l13",name:"Приседания с прыжком",icon:"💥",place:"any",muscle:"Ноги",type:"functional",baseSets:3,baseReps:15,unit:"раз",desc:"Приседай и выпрыгивай."},
+/* НОГИ */
+{id:"l1",name:"Приседания",icon:"🦵",place:"any",muscle:"Ноги, ягодицы",type:"strength",baseSets:4,baseReps:15,unit:"раз",desc:"Стопы шире плеч, носки чуть врозь. Спина прямая, приседай до параллели бёдер с полом. Колени не выходят за носки."},
+{id:"l2",name:"Выпады вперёд",icon:"🚶",place:"any",muscle:"Ноги",type:"strength",baseSets:3,baseReps:12,unit:"раз",desc:"Шагни вперёд, опустись так, чтобы колено задней ноги почти касалось пола. Спина прямая. Возвращайся в исходное."},
+{id:"l3",name:"Болгарские выпады",icon:"🪑",place:"any",muscle:"Ноги",type:"strength",baseSets:3,baseReps:10,unit:"раз",desc:"Задняя нога на возвышении (скамья, стул). Приседай на передней ноге. Сложнее обычных выпадов, отличная нагрузка."},
+{id:"l4",name:"Румынская тяга",icon:"🏋️",place:"gym",muscle:"Задняя поверхность бедра",type:"strength",baseSets:4,baseReps:10,unit:"раз",desc:"Колени чуть согнуты. Опускай штангу по ногам, отводя таз назад. Чувствуй растяжение задней поверхности бедра."},
+{id:"l5",name:"Приседания со штангой",icon:"🏋️",place:"gym",muscle:"Ноги",type:"strength",baseSets:4,baseReps:8,unit:"раз",desc:"Штанга на плечах, хват чуть шире плеч. Приседай до параллели. Пятки не отрываются, спина прямая. Лучшее упражнение для ног."},
+{id:"l6",name:"Жим ногами",icon:"🦵",place:"gym",muscle:"Ноги",type:"strength",baseSets:4,baseReps:12,unit:"раз",desc:"В тренажёре. Стопы на платформе, толкай ногами. Не выпрямляй колени до конца — оставь чуть согнутыми."},
+{id:"l7",name:"Подъёмы на носки",icon:"🦶",place:"any",muscle:"Икры",type:"strength",baseSets:4,baseReps:20,unit:"раз",desc:"Встань на носки, задержись на секунду вверху, плавно опустись. Можно с гантелями для нагрузки."},
+{id:"l8",name:"Приседания плие",icon:"🩰",place:"any",muscle:"Ягодицы, внутренняя поверхность бедра",type:"strength",baseSets:3,baseReps:15,unit:"раз",desc:"Стопы широко, носки врозь. Приседай, разводя колени в стороны. Спина прямая."},
+{id:"l9",name:"Ягодичный мост",icon:"🌉",place:"any",muscle:"Ягодицы",type:"strength",baseSets:3,baseReps:20,unit:"раз",desc:"Лёжа на спине, стопы на полу, колени согнуты. Поднимай таз вверх, сжимая ягодицы. Вверху задержись."},
+{id:"l10",name:"Разгибания ног в тренажёре",icon:"🦵",place:"gym",muscle:"Квадрицепс",type:"strength",baseSets:3,baseReps:15,unit:"раз",desc:"Сидя в тренажёре, выпрямляй ноги. Акцент на переднюю поверхность бедра. Плавно возвращай."},
+{id:"l11",name:"Сгибания ног в тренажёре",icon:"🦵",place:"gym",muscle:"Бицепс бедра",type:"strength",baseSets:3,baseReps:15,unit:"раз",desc:"Лёжа или сидя в тренажёре, сгибай ноги. Акцент на заднюю поверхность бедра."},
+{id:"l12",name:"Зашагивания на платформу",icon:"🪜",place:"gym",muscle:"Ноги, ягодицы",type:"strength",baseSets:3,baseReps:12,unit:"раз",desc:"Зашагивай на тумбу или платформу поочерёдно. Полная стопа на платформе. Не отталкивайся задней ногой."},
+{id:"l13",name:"Приседания с прыжком",icon:"💥",place:"any",muscle:"Ноги, взрывная сила",type:"functional",baseSets:3,baseReps:15,unit:"раз",desc:"Приседай и выпрыгивай вверх. Мягко приземляйся на согнутые ноги. Хорошо для сжигания жира."},
 
-/* ---------- ПЛЕЧИ ---------- */
-{id:"s1",name:"Отжимания в стойке у стены",icon:"🤸",place:"any",muscle:"Плечи",type:"strength",baseSets:3,baseReps:8,unit:"раз",desc:"Опускай голову к полу."},
-{id:"s2",name:"Жим гантелей сидя",icon:"🏋️",place:"gym",muscle:"Плечи",type:"strength",baseSets:4,baseReps:10,unit:"раз",desc:"Жим вверх."},
-{id:"s3",name:"Махи гантелями в стороны",icon:"🕊️",place:"gym",muscle:"Средняя дельта",type:"strength",baseSets:3,baseReps:12,unit:"раз",desc:"До уровня плеч."},
-{id:"s4",name:"Махи в наклоне",icon:"🦅",place:"gym",muscle:"Задняя дельта",type:"strength",baseSets:3,baseReps:12,unit:"раз",desc:"Корпус наклонён."},
-{id:"s5",name:"Шраги с гантелями",icon:"🤷",place:"gym",muscle:"Трапеции",type:"strength",baseSets:3,baseReps:15,unit:"раз",desc:"Вверх и вниз."},
-{id:"s6",name:"Жим штанги стоя",icon:"🏋️",place:"gym",muscle:"Плечи",type:"strength",baseSets:4,baseReps:8,unit:"раз",desc:"Жим над головой."},
-{id:"s7",name:"Тяга к подбородку",icon:"⬆️",place:"gym",muscle:"Плечи",type:"strength",baseSets:3,baseReps:12,unit:"раз",desc:"Локти вверх."},
+/* ПЛЕЧИ */
+{id:"s1",name:"Отжимания в стойке у стены",icon:"🤸",place:"any",muscle:"Плечи",type:"strength",baseSets:3,baseReps:8,unit:"раз",desc:"Стойка на руках у стены. Опускай голову к полу и отжимайся. Продвинутое упражнение для плеч."},
+{id:"s2",name:"Жим гантелей сидя",icon:"🏋️",place:"gym",muscle:"Плечи",type:"strength",baseSets:4,baseReps:10,unit:"раз",desc:"Сидя на скамье со спинкой, гантели у плеч. Жми вверх, не сводя гантели. Спина прижата."},
+{id:"s3",name:"Махи гантелями в стороны",icon:"🕊️",place:"gym",muscle:"Средняя дельта",type:"strength",baseSets:3,baseReps:12,unit:"раз",desc:"Руки чуть согнуты, поднимай гантели в стороны до уровня плеч. Не выше! Плавно опускай."},
+{id:"s4",name:"Махи в наклоне",icon:"🦅",place:"gym",muscle:"Задняя дельта",type:"strength",baseSets:3,baseReps:12,unit:"раз",desc:"Корпус наклонён вперёд, руки с гантелями. Разводи руки в стороны, сводя лопатки."},
+{id:"s5",name:"Шраги с гантелями",icon:"🤷",place:"gym",muscle:"Трапеции",type:"strength",baseSets:3,baseReps:15,unit:"раз",desc:"Гантели вдоль тела. Поднимай плечи вверх (не вращай), задержись на секунду."},
+{id:"s6",name:"Жим штанги стоя",icon:"🏋️",place:"gym",muscle:"Плечи",type:"strength",baseSets:4,baseReps:8,unit:"раз",desc:"Штанга на груди, корпус прямой. Жми над головой. Не прогибайся в пояснице. Опускай к груди."},
+{id:"s7",name:"Тяга к подбородку",icon:"⬆️",place:"gym",muscle:"Плечи",type:"strength",baseSets:3,baseReps:12,unit:"раз",desc:"Штанга в руках хватом сверху. Тяни к подбородку, локти идут вверх и в стороны. Акцент на среднюю дельту."},
 
-/* ---------- РУКИ ---------- */
-{id:"a1",name:"Обратные отжимания от лавки",icon:"🪑",place:"any",muscle:"Трицепс",type:"strength",baseSets:3,baseReps:12,unit:"раз",desc:"Спиной к лавке."},
-{id:"a2",name:"Отжимания узким хватом",icon:"💪",place:"any",muscle:"Трицепс",type:"strength",baseSets:3,baseReps:10,unit:"раз",desc:"Локти прижаты."},
-{id:"a3",name:"Подъём гантелей на бицепс",icon:"💪",place:"any",muscle:"Бицепс",type:"strength",baseSets:4,baseReps:12,unit:"раз",desc:"Локти прижаты."},
-{id:"a4",name:"Молотковые сгибания",icon:"🔨",place:"gym",muscle:"Бицепс",type:"strength",baseSets:3,baseReps:12,unit:"раз",desc:"Хват нейтральный."},
-{id:"a5",name:"Французский жим",icon:"🏋️",place:"gym",muscle:"Трицепс",type:"strength",baseSets:3,baseReps:10,unit:"раз",desc:"Лёжа, штанга над головой."},
-{id:"a6",name:"Разгибания на трицепс в блоке",icon:"⛓️",place:"gym",muscle:"Трицепс",type:"strength",baseSets:3,baseReps:12,unit:"раз",desc:"Локти прижаты."},
-{id:"a7",name:"Сгибания на бицепс в блоке",icon:"⛓️",place:"gym",muscle:"Бицепс",type:"strength",baseSets:3,baseReps:12,unit:"раз",desc:"Стоя у блока."},
-{id:"a8",name:"Концентрированные сгибания",icon:"🎯",place:"gym",muscle:"Бицепс",type:"strength",baseSets:3,baseReps:12,unit:"раз",desc:"Сидя, локоть упирается в бедро."},
+/* РУКИ */
+{id:"a1",name:"Обратные отжимания от лавки",icon:"🪑",place:"any",muscle:"Трицепс",type:"strength",baseSets:3,baseReps:12,unit:"раз",desc:"Спиной к лавке, руки сзади на краю. Опускайся до 90° в локтях, поднимайся. Отличная нагрузка на трицепс."},
+{id:"a2",name:"Отжимания узким хватом",icon:"💪",place:"any",muscle:"Трицепс",type:"strength",baseSets:3,baseReps:10,unit:"раз",desc:"Руки под плечами, локти прижаты к корпусу. Опускайся до касания грудью пола. Акцент на трицепс."},
+{id:"a3",name:"Подъём гантелей на бицепс",icon:"💪",place:"any",muscle:"Бицепс",type:"strength",baseSets:4,baseReps:12,unit:"раз",desc:"Локти прижаты к корпусу. Поднимай гантели вверх, не раскачивайся. Вверху сожми бицепс."},
+{id:"a4",name:"Молотковые сгибания",icon:"🔨",place:"gym",muscle:"Бицепс, предплечье",type:"strength",baseSets:3,baseReps:12,unit:"раз",desc:"Хват нейтральный (ладони друг к другу). Поднимай гантели, локти прижаты. Больше нагрузки на предплечье."},
+{id:"a5",name:"Французский жим",icon:"🏋️",place:"gym",muscle:"Трицепс",type:"strength",baseSets:3,baseReps:10,unit:"раз",desc:"Лёжа, штанга над головой. Сгибай только локти, опуская штангу ко лбу. Возвращай вверх. Трицепс работает изолированно."},
+{id:"a6",name:"Разгибания на трицепс в блоке",icon:"⛓️",place:"gym",muscle:"Трицепс",type:"strength",baseSets:3,baseReps:12,unit:"раз",desc:"Локти прижаты к корпусу. Тяни рукоятку вниз до полного выпрямления. Плавно возвращай."},
+{id:"a7",name:"Сгибания на бицепс в блоке",icon:"⛓️",place:"gym",muscle:"Бицепс",type:"strength",baseSets:3,baseReps:12,unit:"раз",desc:"Стоя у нижнего блока. Тяни рукоятку вверх, локти прижаты. Хорошая изоляция для бицепса."},
+{id:"a8",name:"Концентрированные сгибания",icon:"🎯",place:"gym",muscle:"Бицепс",type:"strength",baseSets:3,baseReps:12,unit:"раз",desc:"Сидя, локоть упирается в бедро. Поднимай гантель, сжимая бицепс. Максимальная изоляция."},
 
-/* ---------- ПРЕСС ---------- */
-{id:"abs1",name:"Планка",icon:"🧘",place:"any",muscle:"Пресс, кор",type:"isometric",baseSets:3,baseReps:45,unit:"сек",desc:"Упор на локти и носки. Тело — прямая."},
-{id:"abs2",name:"Боковая планка",icon:"🌙",place:"any",muscle:"Косые",type:"isometric",baseSets:3,baseReps:30,unit:"сек",desc:"Опора на один локоть."},
-{id:"abs3",name:"Скручивания",icon:"🌀",place:"any",muscle:"Пресс",type:"abs",baseSets:3,baseReps:20,unit:"раз",desc:"Лёжа, руки за головой."},
-{id:"abs4",name:"Обратные скручивания",icon:"🔄",place:"any",muscle:"Низ живота",type:"abs",baseSets:3,baseReps:15,unit:"раз",desc:"Поднимай ноги и таз."},
-{id:"abs5",name:"Велосипед",icon:"🚴",place:"any",muscle:"Пресс",type:"abs",baseSets:3,baseReps:30,unit:"раз",desc:"Тяни локоть к колену."},
-{id:"abs6",name:"Подъём ног лёжа",icon:"🦶",place:"any",muscle:"Низ живота",type:"abs",baseSets:3,baseReps:15,unit:"раз",desc:"Прямые ноги до 90°."},
-{id:"abs7",name:"Русский твист",icon:"🌪️",place:"any",muscle:"Косые",type:"abs",baseSets:3,baseReps:20,unit:"раз",desc:"Поворачивай корпус."},
-{id:"abs8",name:"Скалолаз",icon:"🧗",place:"any",muscle:"Пресс, кардио",type:"functional",baseSets:3,baseReps:30,unit:"сек",desc:"Из планки подтягивай колени."},
-{id:"abs9",name:"Вакуум",icon:"🫁",place:"any",muscle:"Внутренний пресс",type:"isometric",baseSets:3,baseReps:15,unit:"сек",desc:"Втяни живот."},
-{id:"abs10",name:"Касание пяток",icon:"👋",place:"any",muscle:"Косые",type:"abs",baseSets:3,baseReps:20,unit:"раз",desc:"Тянись к пяткам."},
-{id:"abs11",name:"Дровосек в блоке",icon:"🪓",place:"gym",muscle:"Косые",type:"abs",baseSets:3,baseReps:15,unit:"раз",desc:"Тяни по диагонали."},
-{id:"abs12",name:"Подъём ног в висе",icon:"🏗️",place:"street",muscle:"Пресс",type:"abs",baseSets:3,baseReps:12,unit:"раз",desc:"Вис на турнике."},
+/* ПРЕСС */
+{id:"abs1",name:"Планка",icon:"🧘",place:"any",muscle:"Пресс, кор",type:"isometric",baseSets:3,baseReps:45,unit:"сек",desc:"Упор на локти и носки. Тело — одна прямая линия. Не прогибай поясницу, не поднимай таз. Дыши ровно."},
+{id:"abs2",name:"Боковая планка",icon:"🌙",place:"any",muscle:"Косые",type:"isometric",baseSets:3,baseReps:30,unit:"сек",desc:"Опора на один локоть, тело в одну линию. Задержись на 30 секунд, потом смени бок. Работают косые мышцы живота."},
+{id:"abs3",name:"Скручивания",icon:"🌀",place:"any",muscle:"Пресс",type:"abs",baseSets:3,baseReps:20,unit:"раз",desc:"Лёжа на спине, ноги согнуты, руки за головой. Поднимай корпус к коленям. Не тяни шею руками."},
+{id:"abs4",name:"Обратные скручивания",icon:"🔄",place:"any",muscle:"Низ живота",type:"abs",baseSets:3,baseReps:15,unit:"раз",desc:"Лёжа, ноги подняты. Подтягивай колени к груди, отрывая таз от пола. Работает низ живота."},
+{id:"abs5",name:"Велосипед",icon:"🚴",place:"any",muscle:"Пресс",type:"abs",baseSets:3,baseReps:30,unit:"раз",desc:"Лёжа, руки за головой. Поочерёдно тяни локоть к противоположному колену. Ноги не касаются пола."},
+{id:"abs6",name:"Подъём ног лёжа",icon:"🦶",place:"any",muscle:"Низ живота",type:"abs",baseSets:3,baseReps:15,unit:"раз",desc:"Лёжа, руки вдоль тела. Поднимай прямые ноги до 90°, плавно опускай (не касаясь пола)."},
+{id:"abs7",name:"Русский твист",icon:"🌪️",place:"any",muscle:"Косые",type:"abs",baseSets:3,baseReps:20,unit:"раз",desc:"Сидя, корпус отклонён назад. Поворачивай корпус в стороны, руки вытянуты. Работают косые мышцы."},
+{id:"abs8",name:"Скалолаз",icon:"🧗",place:"any",muscle:"Пресс, кардио",type:"functional",baseSets:3,baseReps:30,unit:"сек",desc:"Из планки поочерёдно подтягивай колени к груди. Быстро! Хорошо для пресса и сжигания жира."},
+{id:"abs9",name:"Вакуум",icon:"🫁",place:"any",muscle:"Внутренний пресс",type:"isometric",baseSets:3,baseReps:15,unit:"сек",desc:"Стоя или лёжа, полностью выдохни и втяни живот как можно сильнее. Держи 15 секунд. Тренирует внутренние мышцы."},
+{id:"abs10",name:"Касание пяток",icon:"👋",place:"any",muscle:"Косые",type:"abs",baseSets:3,baseReps:20,unit:"раз",desc:"Лёжа, руки вдоль тела. Поочерёдно тянись руками к пяткам, слегка приподнимая корпус."},
+{id:"abs11",name:"Дровосек в блоке",icon:"🪓",place:"gym",muscle:"Косые",type:"abs",baseSets:3,baseReps:15,unit:"раз",desc:"Верхний блок, тяни рукоятку по диагонали вниз. Работают косые мышцы живота."},
+{id:"abs12",name:"Подъём ног в висе",icon:"🏗️",place:"street",muscle:"Пресс",type:"abs",baseSets:3,baseReps:12,unit:"раз",desc:"Вис на турнике, поднимай прямые ноги до 90°. Сложно, но эффективно. Без раскачивания."},
 
-/* ---------- КАРДИО ---------- */
-{id:"ca1",name:"Бег в лёгком темпе",icon:"🏃",place:"street",muscle:"Кардио",type:"cardio",baseSets:1,baseReps:30,unit:"мин",desc:"Беги так, чтобы мог говорить."},
-{id:"ca2",name:"Интервальный бег",icon:"⚡",place:"street",muscle:"Кардио",type:"cardio",baseSets:6,baseReps:3,unit:"мин",desc:"1 мин быстро + 2 мин медленно."},
-{id:"ca3",name:"Спринты",icon:"💨",place:"street",muscle:"Кардио",type:"cardio",baseSets:8,baseReps:30,unit:"сек",desc:"Максимальная скорость 30 сек."},
-{id:"ca4",name:"Ходьба быстрая",icon:"🚶",place:"street",muscle:"Кардио",type:"cardio",baseSets:1,baseReps:40,unit:"мин",desc:"Скорость 6-7 км/ч."},
-{id:"ca5",name:"Прыжки на скакалке",icon:"🪢",place:"any",muscle:"Кардио",type:"cardio",baseSets:3,baseReps:2,unit:"мин",desc:"Отдых 1 мин между подходами."},
-{id:"ca6",name:"Бёрпи",icon:"🔥",place:"any",muscle:"Всё тело",type:"functional",baseSets:3,baseReps:10,unit:"раз",desc:"Присед → упор лёжа → прыжок."},
-{id:"ca7",name:"Джампинг Джек",icon:"⭐",place:"any",muscle:"Кардио",type:"functional",baseSets:3,baseReps:30,unit:"раз",desc:"Прыжки ноги врозь + руки вверх."},
-{id:"ca8",name:"Высокие колени",icon:"🦵",place:"any",muscle:"Кардио, пресс",type:"functional",baseSets:3,baseReps:30,unit:"сек",desc:"Бег на месте."},
-{id:"ca9",name:"Велотренажёр",icon:"🚴",place:"gym",muscle:"Кардио",type:"cardio",baseSets:1,baseReps:30,unit:"мин",desc:"Средний темп."},
-{id:"ca10",name:"Гребной тренажёр",icon:"🚣",place:"gym",muscle:"Всё тело",type:"cardio",baseSets:1,baseReps:20,unit:"мин",desc:"Работают ноги, спина, руки."},
-{id:"ca11",name:"Эллиптический тренажёр",icon:"🏃",place:"gym",muscle:"Кардио",type:"cardio",baseSets:1,baseReps:30,unit:"мин",desc:"Плавная нагрузка."},
-{id:"ca12",name:"Плавание",icon:"🏊",place:"gym",muscle:"Всё тело",type:"cardio",baseSets:1,baseReps:30,unit:"мин",desc:"Без ударов по суставам."},
+/* КАРДИО */
+{id:"ca1",name:"Бег в лёгком темпе",icon:"🏃",place:"street",muscle:"Кардио",type:"cardio",baseSets:1,baseReps:30,unit:"мин",desc:"Беги так, чтобы мог поддерживать разговор. Пульс 60-75% от максимума. Дыхание ровное, через нос."},
+{id:"ca2",name:"Интервальный бег",icon:"⚡",place:"street",muscle:"Кардио",type:"cardio",baseSets:6,baseReps:3,unit:"мин",desc:"1 минута быстро + 2 минуты медленно. Повторить 6-8 раз. Отлично сжигает жир и тренирует сердце."},
+{id:"ca3",name:"Спринты",icon:"💨",place:"street",muscle:"Кардио",type:"cardio",baseSets:8,baseReps:30,unit:"сек",desc:"Максимальная скорость 30 секунд, затем отдых 90 секунд ходьбой. 8 повторов. Продвинутый уровень."},
+{id:"ca4",name:"Ходьба быстрая",icon:"🚶",place:"street",muscle:"Кардио",type:"cardio",baseSets:1,baseReps:40,unit:"мин",desc:"Скорость 6-7 км/ч. Отличная альтернатива бегу для суставов. Можно с утяжелением."},
+{id:"ca5",name:"Прыжки на скакалке",icon:"🪢",place:"any",muscle:"Кардио",type:"cardio",baseSets:3,baseReps:2,unit:"мин",desc:"2 минуты прыжков, 1 минута отдыха. 3 подхода. Отличное кардио без бега."},
+{id:"ca6",name:"Бёрпи",icon:"🔥",place:"any",muscle:"Всё тело",type:"functional",baseSets:3,baseReps:10,unit:"раз",desc:"Из положения стоя: присед → упор лёжа → отжимание → прыжок вверх. Одно из лучших упражнений для всего тела."},
+{id:"ca7",name:"Джампинг Джек",icon:"⭐",place:"any",muscle:"Кардио",type:"functional",baseSets:3,baseReps:30,unit:"раз",desc:"Прыжки ноги врозь + руки вверх одновременно. Простое, но эффективное кардио."},
+{id:"ca8",name:"Высокие колени",icon:"🦵",place:"any",muscle:"Кардио, пресс",type:"functional",baseSets:3,baseReps:30,unit:"сек",desc:"Бег на месте с высоким подниманием колен. Руки работают в такт. 30 секунд — максимум скорости."},
 
-/* ---------- ФУНКЦИОНАЛ ---------- */
-{id:"f1",name:"Бёрпи с отжиманием",icon:"🔥",place:"any",muscle:"Всё тело",type:"functional",baseSets:3,baseReps:8,unit:"раз",desc:"Бёрпи + отжимание."},
-{id:"f2",name:"Запрыгивания на тумбу",icon:"🪜",place:"any",muscle:"Ноги",type:"functional",baseSets:3,baseReps:10,unit:"раз",desc:"Прыжок на поверхность."},
-{id:"f3",name:"Махи гирей",icon:"🔔",place:"gym",muscle:"Всё тело",type:"functional",baseSets:4,baseReps:15,unit:"раз",desc:"Мах до уровня груди."},
-{id:"f4",name:"Трастеры",icon:"🏋️",place:"gym",muscle:"Всё тело",type:"functional",baseSets:3,baseReps:10,unit:"раз",desc:"Присед + жим."},
-{id:"f5",name:"Фермерская прогулка",icon:"🧳",place:"gym",muscle:"Кор, хват",type:"functional",baseSets:3,baseReps:30,unit:"сек",desc:"Иди с тяжёлыми гантелями."},
-{id:"f6",name:"Медвежья ходьба",icon:"🐻",place:"any",muscle:"Всё тело",type:"functional",baseSets:3,baseReps:20,unit:"сек",desc:"На четвереньках."},
-{id:"f7",name:"Гоблет-приседания",icon:"🏋️",place:"gym",muscle:"Ноги",type:"functional",baseSets:3,baseReps:12,unit:"раз",desc:"Присед с гирей у груди."},
-{id:"f8",name:"Растяжка всего тела",icon:"🧘",place:"any",muscle:"Гибкость",type:"isometric",baseSets:1,baseReps:10,unit:"мин",desc:"Комплекс на все группы мышц."}
+/* ФУНКЦИОНАЛ */
+{id:"f1",name:"Бёрпи с отжиманием",icon:"🔥",place:"any",muscle:"Всё тело",type:"functional",baseSets:3,baseReps:8,unit:"раз",desc:"Классический бёрпи + отжимание внизу. Очень интенсивно. Разминка обязательна."},
+{id:"f2",name:"Запрыгивания на тумбу",icon:"🪜",place:"any",muscle:"Ноги, взрывная сила",type:"functional",baseSets:3,baseReps:10,unit:"раз",desc:"Прыгай на устойчивую поверхность (скамья, тумба) двумя ногами. Мягко приземляйся."},
+{id:"f6",name:"Медвежья ходьба",icon:"🐻",place:"any",muscle:"Всё тело",type:"functional",baseSets:3,baseReps:20,unit:"сек",desc:"На четвереньках (колени над полом). Ходи вперёд-назад. Отлично грузит кор и плечи."},
+{id:"f8",name:"Растяжка всего тела",icon:"🧘",place:"any",muscle:"Гибкость",type:"isometric",baseSets:1,baseReps:10,unit:"мин",desc:"Комплекс на все группы мышц. Медленно, не до боли. Дыхание ровное. После каждой тренировки."}
 ];
 
 /* ============================================================
-   4. ШАБЛОНЫ ДЛЯ АВТО-ПЛАНОВ
-   (используются в app.js для генерации плана)
+   4. ШАБЛОНЫ АВТО-ПЛАНОВ
    ============================================================ */
 const WORKOUT_TEMPLATES = {
-  // ПОХУДЕНИЕ
   lose: {
     title: "Программа для похудения",
     description: "Кардио + круговые. Высокий пульс, сжигание жира.",
@@ -664,11 +624,10 @@ const WORKOUT_TEMPLATES = {
       { dayNum: 3, day: "Среда", focus: "Отдых", icon: "😴", exercises: [] },
       { dayNum: 4, day: "Четверг", focus: "Интервалы", icon: "⚡", exercises: ["ca3","ca5","ca6","ca7"] },
       { dayNum: 5, day: "Пятница", focus: "Круговая", icon: "💪", exercises: ["l2","a1","abs6","abs1","ca8"] },
-      { dayNum: 6, day: "Суббота", focus: "Активное кардио", icon: "🔥", exercises: ["ca12","abs7"] },
+      { dayNum: 6, day: "Суббота", focus: "Активное кардио", icon: "🔥", exercises: ["ca4","abs7","f8"] },
       { dayNum: 7, day: "Воскресенье", focus: "Отдых", icon: "😴", exercises: [] }
     ]
   },
-  // НАБОР МАССЫ
   gain: {
     title: "Программа для набора массы",
     description: "Тяжёлые базовые. Много подходов, мало повторов.",
@@ -682,7 +641,6 @@ const WORKOUT_TEMPLATES = {
       { dayNum: 7, day: "Воскресенье", focus: "Отдых", icon: "😴", exercises: [] }
     ]
   },
-  // ПОДДЕРЖАНИЕ
   keep: {
     title: "Программа для поддержания формы",
     description: "Баланс силы и кардио. Всё тело за неделю.",
@@ -692,7 +650,7 @@ const WORKOUT_TEMPLATES = {
       { dayNum: 3, day: "Среда", focus: "Отдых", icon: "😴", exercises: [] },
       { dayNum: 4, day: "Четверг", focus: "Силовая B", icon: "💪", exercises: ["l2","c2","b3","abs3","a1"] },
       { dayNum: 5, day: "Пятница", focus: "Кардио", icon: "🔥", exercises: ["ca2"] },
-      { dayNum: 6, day: "Суббота", focus: "Активность", icon: "🧘", exercises: ["ca12","f8"] },
+      { dayNum: 6, day: "Суббота", focus: "Активность", icon: "🧘", exercises: ["ca4","f8"] },
       { dayNum: 7, day: "Воскресенье", focus: "Отдых", icon: "😴", exercises: [] }
     ]
   }
@@ -706,5 +664,5 @@ if (typeof window !== "undefined") {
   window.RECIPES = RECIPES;
   window.EXERCISES = EXERCISES;
   window.WORKOUT_TEMPLATES = WORKOUT_TEMPLATES;
-  console.log(`✅ data.js v3.0: ${PRODUCTS.length} продуктов, ${RECIPES.length} рецептов, ${EXERCISES.length} упражнений`);
+  console.log(`✅ data.js v3.3: ${PRODUCTS.length} продуктов, ${RECIPES.length} рецептов, ${EXERCISES.length} упражнений`);
 }
