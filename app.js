@@ -1,5 +1,6 @@
 /* ============================================================
-   FitLife — основная логика (v2.0 — mobile)
+   FitLife — основная логика
+   Версия: 3.0 (генератор плана тренировок)
    Файл: app.js
    ============================================================ */
 
@@ -23,12 +24,14 @@ let state = {
   measurements: [],
   customMeals: [],
   workoutLog: {},
+  workoutPlan: null,        // сгенерированный план на неделю
   theme: "dark",
   planSeed: 0,
   recipeFilter: "all",
   exerciseFilter: "all",
   searchCat: "all",
-  currentMealItems: []
+  currentMealItems: [],
+  level: "novice"           // уровень пользователя
 };
 
 function saveLocal() {
@@ -38,8 +41,10 @@ function saveLocal() {
       measurements: state.measurements,
       customMeals: state.customMeals,
       workoutLog: state.workoutLog,
+      workoutPlan: state.workoutPlan,
       theme: state.theme,
-      planSeed: state.planSeed
+      planSeed: state.planSeed,
+      level: state.level
     }));
   } catch (e) { console.warn("saveLocal error:", e); }
 }
@@ -72,6 +77,7 @@ function showScreen(name) {
   if (name === "dashboard") renderDashboard();
   if (name === "nutrition") generateMealPlan();
   if (name === "workout") renderWorkout();
+  if (name === "my-plan") renderMyPlan();
   if (name === "measure") renderMeasurements();
   if (name === "profile") renderProfile();
   if (name === "search") initSearch();
@@ -79,6 +85,7 @@ function showScreen(name) {
   if (name === "exercises") renderExerciseList();
   if (name === "meal-builder") renderMealBuilder();
   if (name === "my-meals") renderMyMeals();
+  closeMoreMenu();
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
@@ -95,6 +102,16 @@ function animateNumber(id, target) {
   }
   requestAnimationFrame(tick);
 }
+
+/* Меню «Ещё» */
+window.openMoreMenu = function () {
+  document.getElementById("more-menu")?.classList.add("show");
+  document.getElementById("more-overlay")?.classList.add("show");
+};
+window.closeMoreMenu = function () {
+  document.getElementById("more-menu")?.classList.remove("show");
+  document.getElementById("more-overlay")?.classList.remove("show");
+};
 
 /* ============================================================
    3. РАСЧЁТ НОРМЫ
@@ -118,7 +135,237 @@ function calcNorm(user) {
 }
 
 /* ============================================================
-   4. ОНБОРДИНГ
+   4. ГЕНЕРАТОР ПЛАНА ТРЕНИРОВОК
+   ============================================================ */
+
+/**
+ * Считает параметры упражнения (подходы, повторы, отдых)
+ * в зависимости от цели пользователя и его уровня
+ */
+function calcExerciseParams(exercise, user) {
+  const goal = user.goal;
+  const level = state.level || "novice";
+
+  // Множители по цели
+  const goalMod = {
+    lose: { sets: 1, reps: 1.5, rest: 45 },
+    gain: { sets: 1.5, reps: 0.7, rest: 90 },
+    keep: { sets: 1.2, reps: 1, rest: 60 }
+  };
+
+  // Множители по уровню
+  const levelMod = {
+    novice: { sets: 0.8, reps: 0.8 },
+    middle: { sets: 1, reps: 1 },
+    pro: { sets: 1.3, reps: 1.2 }
+  };
+
+  const gm = goalMod[goal] || goalMod.keep;
+  const lm = levelMod[level] || levelMod.novice;
+
+  const sets = Math.max(2, Math.round(exercise.baseSets * gm.sets * lm.sets));
+  const reps = Math.max(4, Math.round(exercise.baseReps * gm.reps * lm.reps));
+  const rest = gm.rest;
+
+  return { sets, reps, rest, unit: exercise.unit };
+}
+
+/**
+ * Генерирует план тренировок на неделю
+ * Возвращает массив из 7 дней
+ */
+function generateWorkoutPlan(user) {
+  const template = WORKOUT_TEMPLATES[user.goal];
+  if (!template) return null;
+
+  const plan = {
+    title: template.title,
+    description: template.description,
+    generatedAt: new Date().toISOString(),
+    days: []
+  };
+
+  template.days.forEach(dayTemplate => {
+    const day = {
+      dayNum: dayTemplate.dayNum,
+      day: dayTemplate.day,
+      focus: dayTemplate.focus,
+      icon: dayTemplate.icon,
+      isRest: dayTemplate.exercises.length === 0,
+      exercises: []
+    };
+
+    dayTemplate.exercises.forEach(exId => {
+      const ex = EXERCISES.find(e => e.id === exId);
+      if (!ex) return;
+
+      // Фильтр по месту тренировки
+      if (user.place === "home" && ex.place === "gym") {
+        // Домашний вариант зального упражнения
+        const homeAlt = EXERCISES.find(e =>
+          e.place === "any" && e.muscle === ex.muscle && e.type === ex.type
+        );
+        if (homeAlt) {
+          const params = calcExerciseParams(homeAlt, user);
+          day.exercises.push({ ...homeAlt, ...params, originalId: ex.id });
+        }
+        return;
+      }
+
+      if (user.place === "street" && ex.place === "gym") {
+        const streetAlt = EXERCISES.find(e =>
+          (e.place === "street" || e.place === "any") &&
+          e.muscle === ex.muscle && e.type === ex.type
+        );
+        if (streetAlt) {
+          const params = calcExerciseParams(streetAlt, user);
+          day.exercises.push({ ...streetAlt, ...params, originalId: ex.id });
+        }
+        return;
+      }
+
+      if (user.place === "gym" && ex.place === "any") {
+        // Для зальных пользователей можно предложить зальный вариант, но "any" тоже ок
+        const params = calcExerciseParams(ex, user);
+        day.exercises.push({ ...ex, ...params });
+        return;
+      }
+
+      const params = calcExerciseParams(ex, user);
+      day.exercises.push({ ...ex, ...params });
+    });
+
+    plan.days.push(day);
+  });
+
+  return plan;
+}
+
+/**
+ * Возвращает сегодняшний день недели (0 = Пн, 6 = Вс)
+ */
+function getTodayIndex() {
+  const d = new Date().getDay(); // 0 = Вс, 1 = Пн ...
+  return d === 0 ? 6 : d - 1;
+}
+
+/* ============================================================
+   5. ЭКРАН «МОЙ ПЛАН»
+   ============================================================ */
+function renderMyPlan() {
+  if (!state.user) return;
+
+  // Генерируем план, если его нет
+  if (!state.workoutPlan) {
+    state.workoutPlan = generateWorkoutPlan(state.user);
+    saveLocal();
+  }
+
+  const box = document.getElementById("my-plan-content");
+  if (!box) return;
+
+  const todayIdx = getTodayIndex();
+  const plan = state.workoutPlan;
+
+  let html = `
+    <div class="card" style="background:linear-gradient(135deg,rgba(108,92,231,.15),rgba(0,210,168,.15))">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px">
+        <div style="font-size:36px">🏋️</div>
+        <div style="flex:1">
+          <div style="font-size:12px;color:var(--text-dim);text-transform:uppercase;letter-spacing:1px">Твой план</div>
+          <div style="font-weight:800;font-size:18px">${plan.title}</div>
+        </div>
+      </div>
+      <p style="font-size:13px;color:var(--text-dim);margin-bottom:12px">${plan.description}</p>
+      <div class="btn-row">
+        <button class="btn small secondary" onclick="regeneratePlan()">🔄 Другой план</button>
+        <button class="btn small secondary" onclick="changeLevel()">🎯 Уровень: ${state.level === "novice" ? "Новичок" : state.level === "middle" ? "Средний" : "Продвинутый"}</button>
+      </div>
+    </div>
+  `;
+
+  plan.days.forEach((day, idx) => {
+    const isToday = idx === todayIdx;
+    const doneKey = `${new Date().toISOString().slice(0,10)}_plan_${idx}`;
+    const isDone = state.workoutLog[doneKey];
+
+    html += `<div class="card" style="${isToday ? "border:2px solid var(--accent);" : ""}">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:${day.exercises.length ? "14px" : "0"}">
+        <div style="width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:24px;background:${day.isRest ? "rgba(255,169,77,.15)" : "rgba(108,92,231,.15)"};flex-shrink:0">${day.icon}</div>
+        <div style="flex:1;min-width:0">
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+            <div style="font-weight:700;font-size:16px">${day.day}</div>
+            ${isToday ? '<span class="badge info" style="font-size:10px">Сегодня</span>' : ''}
+            ${isDone ? '<span class="badge ok" style="font-size:10px">✓</span>' : ''}
+          </div>
+          <div style="font-size:12px;color:var(--text-dim);margin-top:2px">${day.focus}</div>
+        </div>
+      </div>`;
+
+    if (day.exercises.length) {
+      day.exercises.forEach(ex => {
+        const repsText = ex.unit === "сек"
+          ? `${ex.reps} сек`
+          : ex.unit === "мин"
+          ? `${ex.reps} мин`
+          : `${ex.reps} раз`;
+
+        html += `<div class="list-item" onclick="openExercise('${ex.id}')" style="cursor:pointer">
+          <div class="icon">${ex.icon}</div>
+          <div class="info">
+            <div class="title">${ex.name}</div>
+            <div class="sub">
+              ${ex.unit === "мин" ? "" : `<b>${ex.sets} подход${ex.sets === 1 ? "" : ex.sets < 5 ? "а" : "ов"}</b> × `}
+              <b>${repsText}</b>
+              ${ex.unit === "мин" ? "" : ` · отдых ${ex.rest} сек`}
+            </div>
+          </div>
+        </div>`;
+      });
+
+      html += `<button class="btn small ${isDone ? "secondary" : ""}" onclick="markPlanDone(${idx})" style="width:100%;margin-top:10px">
+        ${isDone ? "✓ Выполнено" : "Отметить выполненным"}
+      </button>`;
+    }
+
+    html += `</div>`;
+  });
+
+  box.innerHTML = html;
+}
+
+window.regeneratePlan = function () {
+  state.workoutPlan = generateWorkoutPlan(state.user);
+  saveLocal();
+  renderMyPlan();
+  toast("План обновлён 🔄", "ok");
+};
+
+window.changeLevel = function () {
+  const levels = ["novice", "middle", "pro"];
+  const names = { novice: "Новичок", middle: "Средний", pro: "Продвинутый" };
+  const current = levels.indexOf(state.level);
+  const next = (current + 1) % levels.length;
+  state.level = levels[next];
+  state.workoutPlan = generateWorkoutPlan(state.user);
+  saveLocal();
+  renderMyPlan();
+  toast(`Уровень: ${names[state.level]}`, "ok");
+};
+
+window.markPlanDone = function (idx) {
+  const t = new Date().toISOString().slice(0, 10);
+  const k = `${t}_plan_${idx}`;
+  state.workoutLog[k] = !state.workoutLog[k];
+  saveLocal();
+  renderMyPlan();
+  if (state.workoutLog[k]) toast("Молодец! 💪", "ok");
+  const u = getCurrentUser();
+  if (u) saveWorkoutLogToCloud(u.uid, state.workoutLog);
+};
+
+/* ============================================================
+   6. ОНБОРДИНГ
    ============================================================ */
 window.obNext = function (step) {
   if (step === 3) {
@@ -143,11 +390,18 @@ window.finishOnboarding = async function () {
   const goal = document.querySelector('input[name="ob-goal"]:checked').value;
   const activity = +document.getElementById("ob-activity").value;
   const place = document.getElementById("ob-place").value;
-  state.user = { name, sex, age, height, weight, goal, activity, place };
+  const level = document.querySelector('input[name="ob-level"]:checked')?.value || "novice";
+  const daysPerWeek = +document.getElementById("ob-days")?.value || 3;
+
+  state.user = { name, sex, age, height, weight, goal, activity, place, daysPerWeek };
+  state.level = level;
   state.norm = calcNorm(state.user);
+  state.workoutPlan = generateWorkoutPlan(state.user);
   saveLocal();
+
   const u = getCurrentUser();
   if (u) await saveProfileToCloud(u.uid, state.user);
+
   document.getElementById("nav").classList.remove("hidden");
   showScreen("dashboard");
   toast("Профиль создан! 🚀", "ok");
@@ -170,10 +424,14 @@ window.editProfile = function () {
   document.querySelector(`input[name="ob-goal"][value="${state.user.goal}"]`).checked = true;
   document.getElementById("ob-activity").value = state.user.activity;
   document.getElementById("ob-place").value = state.user.place || "any";
+  const levelEl = document.querySelector(`input[name="ob-level"][value="${state.level}"]`);
+  if (levelEl) levelEl.checked = true;
+  const daysEl = document.getElementById("ob-days");
+  if (daysEl && state.user.daysPerWeek) daysEl.value = state.user.daysPerWeek;
 };
 
 /* ============================================================
-   5. DASHBOARD
+   7. DASHBOARD
    ============================================================ */
 function renderDashboard() {
   if (!state.user || !state.norm) return;
@@ -187,6 +445,57 @@ function renderDashboard() {
   animateNumber("dash-carb", state.norm.c);
   renderRing();
   renderWeightChart();
+  renderTodayWorkout();
+}
+
+function renderTodayWorkout() {
+  const box = document.getElementById("today-workout");
+  if (!box || !state.workoutPlan) return;
+  const todayIdx = getTodayIndex();
+  const day = state.workoutPlan.days[todayIdx];
+  if (!day) { box.innerHTML = ""; return; }
+
+  if (day.isRest) {
+    box.innerHTML = `
+      <div class="card" style="background:linear-gradient(135deg,rgba(255,169,77,.15),rgba(255,107,107,.1))">
+        <div style="display:flex;align-items:center;gap:12px">
+          <div style="font-size:40px">😴</div>
+          <div style="flex:1">
+            <div style="font-size:12px;color:var(--text-dim);text-transform:uppercase;letter-spacing:1px">Сегодня</div>
+            <div style="font-weight:700;font-size:16px">День отдыха</div>
+            <div style="font-size:12px;color:var(--text-dim);margin-top:4px">Прогулка или растяжка</div>
+          </div>
+        </div>
+      </div>`;
+    return;
+  }
+
+  let exHtml = day.exercises.slice(0, 3).map(ex => {
+    const repsText = ex.unit === "сек" ? `${ex.reps} сек` :
+                     ex.unit === "мин" ? `${ex.reps} мин` : `${ex.reps} раз`;
+    return `<div style="display:flex;align-items:center;gap:8px;padding:8px 0;font-size:13px">
+      <span>${ex.icon}</span>
+      <span style="flex:1">${ex.name}</span>
+      <span style="color:var(--text-dim);font-weight:600">${ex.sets}×${repsText}</span>
+    </div>`;
+  }).join("");
+
+  if (day.exercises.length > 3) {
+    exHtml += `<div style="font-size:12px;color:var(--text-dim);padding-top:8px">+${day.exercises.length - 3} упражнений</div>`;
+  }
+
+  box.innerHTML = `
+    <div class="card" style="background:linear-gradient(135deg,rgba(108,92,231,.15),rgba(0,210,168,.1))">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
+        <div style="font-size:40px">${day.icon}</div>
+        <div style="flex:1">
+          <div style="font-size:12px;color:var(--text-dim);text-transform:uppercase;letter-spacing:1px">Тренировка сегодня</div>
+          <div style="font-weight:700;font-size:16px">${day.focus}</div>
+        </div>
+      </div>
+      ${exHtml}
+      <button class="btn small" onclick="showScreen('my-plan')" style="width:100%;margin-top:12px">📋 Открыть план на неделю</button>
+    </div>`;
 }
 
 function renderRing() {
@@ -258,7 +567,7 @@ function renderWeightChart() {
 }
 
 /* ============================================================
-   6. РАЦИОН
+   8. РАЦИОН
    ============================================================ */
 function generateMealPlan(shuffle = false) {
   if (!state.norm) return;
@@ -317,7 +626,7 @@ function pickRecipe(meal, target, goal, slot) {
 }
 
 /* ============================================================
-   7. РЕЦЕПТЫ
+   9. РЕЦЕПТЫ
    ============================================================ */
 function renderRecipeList() {
   const chips = document.getElementById("recipe-chips");
@@ -378,54 +687,18 @@ window.openRecipe = function (id) {
 };
 
 /* ============================================================
-   8. ТРЕНИРОВКИ
+   10. ТРЕНИРОВКИ (старый экран, оставлен для совместимости)
    ============================================================ */
 function renderWorkout() {
   if (!state.user) return;
-  const plan = WORKOUT_PLANS[state.user.goal];
-  document.getElementById("workout-sub").textContent = plan.title + " · авто";
-  const list = document.getElementById("workout-list");
-  list.innerHTML = "";
-  plan.days.forEach((d, i) => {
-    const card = document.createElement("div");
-    card.className = "card";
-    const isRest = d.type === "Отдых";
-    const isDone = state.workoutLog[`${new Date().toISOString().slice(0, 10)}_${i}`];
-    card.innerHTML = `
-      <div style="display:flex;align-items:center;gap:12px;margin-bottom:${d.ex.length ? "12px" : "0"}">
-        <div class="icon" style="width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;background:${isRest ? "rgba(255,169,77,.15)" : "rgba(108,92,231,.15)"}">
-          ${isRest ? "😴" : d.type.includes("Бег") ? "🏃" : "💪"}
-        </div>
-        <div style="flex:1"><div style="font-weight:700">${d.day}</div>
-        <div style="font-size:12px;color:var(--text-dim)">${d.type} · ${d.note}</div></div>
-        ${!isRest ? `<button class="btn small ${isDone ? "secondary" : ""}" onclick="markWorkout(${i})">${isDone ? "✓" : "Готово"}</button>` : ""}
-      </div>
-      ${d.ex.map(exId => {
-        const ex = EXERCISES.find(e => e.id === exId);
-        if (!ex) return "";
-        return `<div class="list-item" onclick="openExercise('${ex.id}')" style="cursor:pointer">
-          <div class="icon">${ex.icon}</div>
-          <div class="info"><div class="title">${ex.name}</div><div class="sub">${ex.reps} · ${ex.muscle}</div></div>
-        </div>`;
-      }).join("")}`;
-    list.appendChild(card);
-  });
+  // Сразу перекидываем на новый экран «Мой план»
+  showScreen("my-plan");
 }
-
-window.markWorkout = function (idx) {
-  const t = new Date().toISOString().slice(0, 10);
-  const k = `${t}_${idx}`;
-  state.workoutLog[k] = !state.workoutLog[k];
-  saveLocal();
-  renderWorkout();
-  if (state.workoutLog[k]) toast("Выполнено! 💪", "ok");
-  const u = getCurrentUser();
-  if (u) saveWorkoutLogToCloud(u.uid, state.workoutLog);
-};
 
 let timerInt = null, timerSec = 0, timerRun = false;
 window.toggleTimer = function () {
   const b = document.getElementById("timer-start");
+  if (!b) return;
   if (timerRun) {
     clearInterval(timerInt); timerRun = false; b.textContent = "▶ Продолжить";
   } else {
@@ -436,7 +709,8 @@ window.toggleTimer = function () {
 window.resetTimer = function () {
   clearInterval(timerInt); timerRun = false; timerSec = 0;
   updTimer();
-  document.getElementById("timer-start").textContent = "▶ Старт";
+  const b = document.getElementById("timer-start");
+  if (b) b.textContent = "▶ Старт";
 };
 function updTimer() {
   const m = String(Math.floor(timerSec / 60)).padStart(2, "0");
@@ -446,7 +720,7 @@ function updTimer() {
 }
 
 /* ============================================================
-   9. УПРАЖНЕНИЯ
+   11. УПРАЖНЕНИЯ
    ============================================================ */
 function renderExerciseList() {
   const chips = document.getElementById("exercise-chips");
@@ -468,7 +742,7 @@ function renderExerciseList() {
       <div style="display:flex;align-items:center;gap:12px">
         <div style="font-size:32px">${e.icon}</div>
         <div style="flex:1"><div style="font-weight:700">${e.name}</div>
-        <div style="font-size:12px;color:var(--text-dim)">${e.muscle} · ${e.reps}</div></div>
+        <div style="font-size:12px;color:var(--text-dim)">${e.muscle} · ${e.baseSets}×${e.baseReps} ${e.unit}</div></div>
         <span class="badge info">${e.place === "home" ? "🏠" : e.place === "street" ? "🌳" : e.place === "gym" ? "🏋️" : "🌍"}</span>
       </div>
     </div>`).join("");
@@ -490,7 +764,7 @@ window.openExercise = function (id) {
         <div style="font-size:13px;color:var(--text-dim)">${e.muscle}</div></div>
       </div>
       <div class="macros" style="grid-template-columns:1fr 1fr">
-        <div class="macro"><div class="val" style="font-size:16px">${e.reps}</div><div class="name">Подходы/повторы</div></div>
+        <div class="macro"><div class="val" style="font-size:16px">${e.baseSets}×${e.baseReps} ${e.unit}</div><div class="name">Базовый объём</div></div>
         <div class="macro"><div class="val" style="font-size:16px">${e.place === "home" ? "Дом" : e.place === "street" ? "Улица" : e.place === "gym" ? "Зал" : "Везде"}</div><div class="name">Место</div></div>
       </div>
     </div>
@@ -499,7 +773,7 @@ window.openExercise = function (id) {
 };
 
 /* ============================================================
-   10. ЗАМЕРЫ
+   12. ЗАМЕРЫ
    ============================================================ */
 window.saveMeasurement = async function () {
   const w = +document.getElementById("m-weight").value;
@@ -515,6 +789,7 @@ window.saveMeasurement = async function () {
   state.measurements.push(m);
   state.user.weight = w;
   state.norm = calcNorm(state.user);
+  state.workoutPlan = generateWorkoutPlan(state.user);
   saveLocal();
   const u = getCurrentUser();
   if (u) {
@@ -549,7 +824,7 @@ function renderMeasurements() {
 }
 
 /* ============================================================
-   11. ПОИСК
+   13. ПОИСК
    ============================================================ */
 function initSearch() {
   const sel = document.getElementById("photo-product-select");
@@ -726,7 +1001,7 @@ window.searchFromAPI = async function () {
 };
 
 /* ============================================================
-   12. КОНСТРУКТОР БЛЮД
+   14. КОНСТРУКТОР БЛЮД
    ============================================================ */
 function renderMealBuilder() {
   renderBuilderItems();
@@ -853,7 +1128,7 @@ window.deleteMyMeal = async function (idx) {
 };
 
 /* ============================================================
-   13. ПРОФИЛЬ
+   15. ПРОФИЛЬ
    ============================================================ */
 function renderProfile() {
   if (!state.user) return;
@@ -861,6 +1136,7 @@ function renderProfile() {
   const gT = { lose: "Похудеть", gain: "Набрать массу", keep: "Поддерживать" }[u.goal];
   const sT = u.sex === "m" ? "Мужской" : "Женский";
   const pT = { home: "Дома", street: "На улице", gym: "В зале", any: "Везде" }[u.place || "any"];
+  const lT = { novice: "Новичок", middle: "Средний", pro: "Продвинутый" }[state.level];
   const email = state.fbUser?.email || "—";
   document.getElementById("profile-info").innerHTML = `
     <div class="list-item"><div class="icon">👤</div><div class="info"><div class="title">${u.name}</div><div class="sub">${sT}, ${u.age} лет</div></div></div>
@@ -868,6 +1144,7 @@ function renderProfile() {
     <div class="list-item"><div class="icon">📏</div><div class="info"><div class="title">${u.height} см · ${u.weight} кг</div><div class="sub">Рост и вес</div></div></div>
     <div class="list-item"><div class="icon">🎯</div><div class="info"><div class="title">${gT}</div><div class="sub">Цель</div></div></div>
     <div class="list-item"><div class="icon">🏋️</div><div class="info"><div class="title">${pT}</div><div class="sub">Место тренировок</div></div></div>
+    <div class="list-item"><div class="icon">⭐</div><div class="info"><div class="title">${lT}</div><div class="sub">Уровень</div></div></div>
     <div class="list-item"><div class="icon">🔥</div><div class="info"><div class="title">${state.norm.cal} ккал</div><div class="sub">Б:${state.norm.p} · Ж:${state.norm.f} · У:${state.norm.c}</div></div></div>`;
 }
 
@@ -921,7 +1198,7 @@ function applyTheme() {
 }
 
 /* ============================================================
-   14. АУТЕНТИФИКАЦИЯ — UI
+   16. АУТЕНТИФИКАЦИЯ
    ============================================================ */
 window.showAuth = function (mode) {
   document.getElementById("auth-login").classList.toggle("hidden", mode !== "login");
@@ -957,7 +1234,6 @@ window.doGoogleLogin = async function () {
   toast("Открываю Google...");
   const res = await loginWithGoogle();
   if (!res.ok) return toast(res.error, "bad");
-  // Если redirect — браузер сам уйдёт на google.com, потом вернётся
 };
 
 window.doLogout = async function () {
@@ -967,7 +1243,7 @@ window.doLogout = async function () {
 };
 
 /* ============================================================
-   15. ЗАГРУЗКА ПОСЛЕ ВХОДА
+   17. ЗАГРУЗКА ПОСЛЕ ВХОДА
    ============================================================ */
 async function afterLogin(fbUser) {
   state.fbUser = fbUser;
@@ -975,6 +1251,7 @@ async function afterLogin(fbUser) {
   if (sync.profile) {
     state.user = sync.profile;
     state.norm = calcNorm(state.user);
+    state.workoutPlan = generateWorkoutPlan(state.user);
   }
   if (sync.measurements?.length) state.measurements = sync.measurements;
   if (sync.customMeals?.length) state.customMeals = sync.customMeals;
@@ -997,7 +1274,7 @@ function showAuthScreen() {
 }
 
 /* ============================================================
-   16. PWA УСТАНОВКА
+   18. PWA
    ============================================================ */
 let deferredPrompt = null;
 window.addEventListener("beforeinstallprompt", e => {
@@ -1027,9 +1304,9 @@ window.installApp = function () {
   } else {
     const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
     if (isIOS) {
-      alert("📲 Установка на iPhone:\n\n1. Нажми «Поделиться» (квадрат со стрелкой) в Safari\n2. Пролистай и выбери «На экран Домой»\n3. Нажми «Добавить»");
+      alert("📲 Установка на iPhone:\n\n1. Нажми «Поделиться» (квадрат со стрелкой)\n2. Пролистай → «На экран Домой»\n3. «Добавить»");
     } else {
-      alert("📲 Установка:\n\n1. Открой меню браузера (⋮)\n2. Выбери «Установить приложение» или «Добавить на главный экран»\n3. Подтверди");
+      alert("📲 Установка:\n\n1. Меню браузера (⋮)\n2. «Установить приложение»\n3. Подтверди");
     }
   }
 };
@@ -1040,7 +1317,7 @@ window.dismissInstall = function () {
 };
 
 /* ============================================================
-   17. ИНИЦИАЛИЗАЦИЯ
+   19. ИНИЦИАЛИЗАЦИЯ
    ============================================================ */
 async function init() {
   loadLocal();
@@ -1057,7 +1334,6 @@ async function init() {
     mbSel.innerHTML = PRODUCTS.map(p => `<option value="${p.name}">${p.name}</option>`).join("");
   }
 
-  // Проверяем, не вернулись ли мы с редиректа Google
   const redirectRes = await checkRedirectResult();
   if (redirectRes.ok && redirectRes.user) {
     toast("Добро пожаловать! 👋", "ok");
@@ -1069,6 +1345,7 @@ async function init() {
     } else {
       state.fbUser = null;
       if (state.user) {
+        if (!state.workoutPlan) state.workoutPlan = generateWorkoutPlan(state.user);
         document.getElementById("nav").classList.remove("hidden");
         showScreen("dashboard");
       } else {
@@ -1092,4 +1369,4 @@ window.toast = toast;
 
 document.addEventListener("DOMContentLoaded", init);
 
-console.log("✅ app.js (mobile) загружен");
+console.log("✅ app.js v3.0 (генератор плана) загружен");
