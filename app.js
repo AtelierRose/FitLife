@@ -1,6 +1,6 @@
 /* ============================================================
    FitLife — основная логика
-   Версия: 4.0 (график веса + описания упражнений)
+   Версия: 4.1 (исправлены кнопки Ещё и Другой вариант)
    Файл: app.js
    ============================================================ */
 
@@ -25,6 +25,7 @@ let state = {
   customMeals: [],
   workoutLog: {},
   workoutPlan: null,
+  currentMealPlan: null,
   theme: "dark",
   planSeed: 0,
   recipeFilter: "all",
@@ -75,7 +76,7 @@ function showScreen(name) {
     b.classList.toggle("active", b.dataset.screen === name)
   );
   if (name === "dashboard") renderDashboard();
-  if (name === "nutrition") generateMealPlan();
+  if (name === "nutrition") window.generateMealPlan();
   if (name === "my-plan") renderMyPlan();
   if (name === "measure") renderMeasurements();
   if (name === "profile") renderProfile();
@@ -84,7 +85,7 @@ function showScreen(name) {
   if (name === "exercises") renderExerciseList();
   if (name === "meal-builder") renderMealBuilder();
   if (name === "my-meals") renderMyMeals();
-  closeMoreMenu();
+  window.closeMoreMenu();
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
@@ -102,13 +103,19 @@ function animateNumber(id, target) {
   requestAnimationFrame(tick);
 }
 
+/* Меню «Ещё» — привязано к window, работает всегда */
 window.openMoreMenu = function () {
-  document.getElementById("more-menu")?.classList.add("show");
-  document.getElementById("more-overlay")?.classList.add("show");
+  const menu = document.getElementById("more-menu");
+  const overlay = document.getElementById("more-overlay");
+  if (menu) menu.classList.add("show");
+  if (overlay) overlay.classList.add("show");
 };
+
 window.closeMoreMenu = function () {
-  document.getElementById("more-menu")?.classList.remove("show");
-  document.getElementById("more-overlay")?.classList.remove("show");
+  const menu = document.getElementById("more-menu");
+  const overlay = document.getElementById("more-overlay");
+  if (menu) menu.classList.remove("show");
+  if (overlay) overlay.classList.remove("show");
 };
 
 /* ============================================================
@@ -473,7 +480,7 @@ function renderRing() {
 }
 
 /* ============================================================
-   8. ГРАФИК ВЕСА — СТИЛЬ ДНС
+   8. ГРАФИК ВЕСА
    ============================================================ */
 function renderWeightChart() {
   const cv = document.getElementById("weight-chart");
@@ -483,19 +490,17 @@ function renderWeightChart() {
 
   if (!state.measurements.length) {
     cv.classList.add("hidden");
-    em.classList.remove("hidden");
+    if (em) em.classList.remove("hidden");
     if (info) info.classList.add("hidden");
     return;
   }
 
   cv.classList.remove("hidden");
-  em.classList.add("hidden");
+  if (em) em.classList.add("hidden");
   if (info) info.classList.remove("hidden");
 
-  // Сортируем по дате
   const sorted = [...state.measurements].sort((a, b) => new Date(a.date) - new Date(b.date));
 
-  // Инфо сверху
   if (info) {
     const first = sorted[0];
     const last = sorted[sorted.length - 1];
@@ -520,7 +525,6 @@ function renderWeightChart() {
       </div>`;
   }
 
-  // Рисуем график
   const ctx = cv.getContext("2d");
   const dpr = window.devicePixelRatio || 1;
   const rect = cv.getBoundingClientRect();
@@ -532,11 +536,10 @@ function renderWeightChart() {
   cv.style.height = H + "px";
   ctx.scale(dpr, dpr);
 
-  // Параметры
-  const padLeft = 44;    // место для шкалы значений
+  const padLeft = 44;
   const padRight = 16;
   const padTop = 24;
-  const padBottom = 40;  // место для дат
+  const padBottom = 40;
 
   const chartW = W - padLeft - padRight;
   const chartH = H - padTop - padBottom;
@@ -546,12 +549,10 @@ function renderWeightChart() {
   const maxW = Math.max(...weights);
   const range = maxW - minW || 1;
 
-  // Отступы сверху/снизу для шкалы
   const scaleMin = minW - range * 0.15;
   const scaleMax = maxW + range * 0.15;
   const scaleRange = scaleMax - scaleMin;
 
-  // X координаты точек
   const points = sorted.map((m, i) => ({
     x: padLeft + (chartW * i / Math.max(sorted.length - 1, 1)),
     y: padTop + chartH * (1 - (m.weight - scaleMin) / scaleRange),
@@ -559,16 +560,13 @@ function renderWeightChart() {
     date: m.date
   }));
 
-  // Очистка
   ctx.clearRect(0, 0, W, H);
 
-  // === ГОРИЗОНТАЛЬНЫЕ ЛИНИИ + ШКАЛА СЛЕВА ===
   const gridCount = 4;
   for (let i = 0; i <= gridCount; i++) {
     const value = scaleMax - (scaleRange * i / gridCount);
     const y = padTop + chartH * (i / gridCount);
 
-    // Линия сетки
     ctx.beginPath();
     ctx.moveTo(padLeft, y);
     ctx.lineTo(W - padRight, y);
@@ -576,7 +574,6 @@ function renderWeightChart() {
     ctx.lineWidth = 1;
     ctx.stroke();
 
-    // Подпись слева
     ctx.fillStyle = "#a89ec9";
     ctx.font = "11px -apple-system, sans-serif";
     ctx.textAlign = "right";
@@ -584,33 +581,26 @@ function renderWeightChart() {
     ctx.fillText(value.toFixed(1), padLeft - 8, y);
   }
 
-  // === ЦВЕТ ЛИНИИ ===
-  // Если вес падает — зелёный, если растёт — красный, если стоит — фиолетовый
   const totalDiff = points[points.length - 1].weight - points[0].weight;
   let lineColorStart, lineColorEnd, pointColor;
   if (totalDiff < -0.3) {
-    // Похудение — зелёный
     lineColorStart = "#10b981";
     lineColorEnd = "#06b6d4";
     pointColor = "#10b981";
   } else if (totalDiff > 0.3) {
-    // Набор массы — оранжевый/красный
     lineColorStart = "#fb923c";
     lineColorEnd = "#f43f5e";
     pointColor = "#fb923c";
   } else {
-    // Стабильно — фиолетовый
     lineColorStart = "#a855f7";
     lineColorEnd = "#06b6d4";
     pointColor = "#a855f7";
   }
 
-  // === ГРАДИЕНТНАЯ ЛИНИЯ ===
   const lineGrad = ctx.createLinearGradient(padLeft, 0, W - padRight, 0);
   lineGrad.addColorStop(0, lineColorStart);
   lineGrad.addColorStop(1, lineColorEnd);
 
-  // Плавная линия (Безье)
   if (points.length >= 2) {
     ctx.beginPath();
     ctx.moveTo(points[0].x, points[0].y);
@@ -626,7 +616,6 @@ function renderWeightChart() {
     ctx.lineJoin = "round";
     ctx.stroke();
 
-    // === ГРАДИЕНТНАЯ ЗАЛИВКА ПОД ЛИНИЕЙ ===
     const fillGrad = ctx.createLinearGradient(0, padTop, 0, H - padBottom);
     fillGrad.addColorStop(0, lineColorStart + "44");
     fillGrad.addColorStop(1, lineColorStart + "00");
@@ -644,34 +633,28 @@ function renderWeightChart() {
     ctx.fillStyle = fillGrad;
     ctx.fill();
   } else if (points.length === 1) {
-    // Одна точка — просто линия
     ctx.beginPath();
     ctx.arc(points[0].x, points[0].y, 6, 0, Math.PI * 2);
     ctx.fillStyle = pointColor;
     ctx.fill();
   }
 
-  // === ТОЧКИ ===
   points.forEach((p, i) => {
-    // Свечение
     ctx.beginPath();
     ctx.arc(p.x, p.y, 10, 0, Math.PI * 2);
     ctx.fillStyle = pointColor + "22";
     ctx.fill();
 
-    // Белая обводка
     ctx.beginPath();
     ctx.arc(p.x, p.y, 6, 0, Math.PI * 2);
     ctx.fillStyle = "#fff";
     ctx.fill();
 
-    // Внутренний цветной круг
     ctx.beginPath();
     ctx.arc(p.x, p.y, 4, 0, Math.PI * 2);
     ctx.fillStyle = pointColor;
     ctx.fill();
 
-    // Подпись веса над точкой (только для первой, последней и если точек мало)
     const showLabel = i === 0 || i === points.length - 1 || points.length <= 5;
     if (showLabel) {
       ctx.fillStyle = "#f5f3ff";
@@ -681,7 +664,6 @@ function renderWeightChart() {
       ctx.fillText(p.weight.toFixed(1), p.x, p.y - 12);
     }
 
-    // Дата снизу
     const d = new Date(p.date);
     const dateStr = d.toLocaleDateString("ru-RU", { day: "numeric", month: "short" });
     ctx.fillStyle = "#6b6490";
@@ -693,25 +675,36 @@ function renderWeightChart() {
 }
 
 /* ============================================================
-   9. РАЦИОН
+   9. РАЦИОН — С ИСПРАВЛЕННОЙ КНОПКОЙ "ДРУГОЙ ВАРИАНТ"
    ============================================================ */
-function generateMealPlan(shuffle = false) {
-  if (!state.norm) return;
-  if (shuffle) state.planSeed++;
+window.generateMealPlan = function (shuffle = false) {
+  if (!state.norm || !state.user) return;
   const goal = state.user.goal;
   const t = state.norm;
   const dist = { breakfast: 0.25, lunch: 0.35, dinner: 0.30, snack: 0.10 };
+
+  // Исключаем блюда из предыдущего рациона
+  const currentIds = state.currentMealPlan
+    ? Object.values(state.currentMealPlan).map(r => r?.id).filter(Boolean)
+    : [];
+
   const meals = {
-    breakfast: pickRecipe("breakfast", t.cal * dist.breakfast, goal, 0),
-    lunch: pickRecipe("lunch", t.cal * dist.lunch, goal, 1),
-    dinner: pickRecipe("dinner", t.cal * dist.dinner, goal, 2),
-    snack: pickRecipe("snack", t.cal * dist.snack, goal, 3)
+    breakfast: pickRecipe("breakfast", t.cal * dist.breakfast, goal, 0, currentIds),
+    lunch: pickRecipe("lunch", t.cal * dist.lunch, goal, 1, currentIds),
+    dinner: pickRecipe("dinner", t.cal * dist.dinner, goal, 2, currentIds),
+    snack: pickRecipe("snack", t.cal * dist.snack, goal, 3, currentIds)
   };
+
+  state.currentMealPlan = meals;
+  state.planSeed = (state.planSeed || 0) + 1;
+  saveLocal();
+
   const list = document.getElementById("nutri-list");
   if (!list) return;
   list.innerHTML = "";
   let tc = 0, tp = 0, tf = 0, tch = 0;
   const lbl = { breakfast: "🌅 Завтрак", lunch: "☀️ Обед", dinner: "🌙 Ужин", snack: "🍎 Перекус" };
+
   Object.keys(meals).forEach(k => {
     const r = meals[k];
     if (!r) return;
@@ -732,14 +725,27 @@ function generateMealPlan(shuffle = false) {
       <button class="btn small secondary" onclick="openRecipe('${r.id}')">📖 Открыть рецепт</button>`;
     list.appendChild(card);
   });
-  document.getElementById("nutri-total-cal").textContent = tc;
-  document.getElementById("nutri-total-sub").textContent =
-    `Б:${tp}г · Ж:${tf}г · У:${tch}г · норма ${state.norm.cal} ккал`;
-}
 
-function pickRecipe(meal, target, goal, slot) {
-  const pool = RECIPES.filter(r => r.meal === meal);
+  const totalCalEl = document.getElementById("nutri-total-cal");
+  const totalSubEl = document.getElementById("nutri-total-sub");
+  if (totalCalEl) totalCalEl.textContent = tc;
+  if (totalSubEl) totalSubEl.textContent =
+    `Б:${tp}г · Ж:${tf}г · У:${tch}г · норма ${state.norm.cal} ккал`;
+
+  if (shuffle) toast("Новый рацион! 🍽️", "ok");
+};
+
+function pickRecipe(meal, target, goal, slot, exclude = []) {
+  let pool = RECIPES.filter(r => r.meal === meal);
   if (!pool.length) return null;
+
+  // Исключаем уже показанные блюда (если их осталось достаточно)
+  if (exclude.length) {
+    const filtered = pool.filter(r => !exclude.includes(r.id));
+    if (filtered.length >= 2) pool = filtered;
+  }
+
+  // Оценка «похожести» на цель
   const sc = pool.map(r => {
     let s = Math.abs(r.cal - target);
     if (goal === "lose") s -= r.p * 2;
@@ -747,8 +753,13 @@ function pickRecipe(meal, target, goal, slot) {
     return { r, s };
   });
   sc.sort((a, b) => a.s - b.s);
-  const top = sc.slice(0, Math.min(3, sc.length));
-  return top[(state.planSeed + slot) % top.length].r;
+
+  // Берём ТОП-8 для большего разнообразия
+  const top = sc.slice(0, Math.min(8, sc.length));
+
+  // Случайный выбор каждый раз
+  const rand = Math.floor(Math.random() * top.length);
+  return top[rand].r;
 }
 
 /* ============================================================
@@ -770,7 +781,9 @@ function renderRecipeList() {
     `<button class="chip ${state.recipeFilter === c.id ? "active" : ""}" onclick="setRecipeFilter('${c.id}')">${c.n}</button>`
   ).join("");
   const filtered = state.recipeFilter === "all" ? RECIPES : RECIPES.filter(r => r.meal === state.recipeFilter);
-  document.getElementById("recipe-list").innerHTML = filtered.map(r => `
+  const listEl = document.getElementById("recipe-list");
+  if (!listEl) return;
+  listEl.innerHTML = filtered.map(r => `
     <div class="card" style="cursor:pointer" onclick="openRecipe('${r.id}')">
       <div style="display:flex;align-items:center;gap:12px">
         <div style="font-size:36px">${r.icon}</div>
@@ -830,7 +843,9 @@ function renderExerciseList() {
   const filtered = state.exerciseFilter === "all"
     ? EXERCISES
     : EXERCISES.filter(e => e.place === state.exerciseFilter || e.place === "any");
-  document.getElementById("exercise-list").innerHTML = filtered.map(e => `
+  const listEl = document.getElementById("exercise-list");
+  if (!listEl) return;
+  listEl.innerHTML = filtered.map(e => `
     <div class="card" style="cursor:pointer" onclick="openExercise('${e.id}')">
       <div style="display:flex;align-items:center;gap:12px">
         <div style="font-size:32px">${e.icon}</div>
@@ -889,7 +904,10 @@ window.saveMeasurement = async function () {
     await saveMeasurementToCloud(u.uid, m);
     await saveProfileToCloud(u.uid, state.user);
   }
-  ["m-weight", "m-chest", "m-waist", "m-hips", "m-arm"].forEach(id => document.getElementById(id).value = "");
+  ["m-weight", "m-chest", "m-waist", "m-hips", "m-arm"].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = "";
+  });
   renderMeasurements();
   renderWeightChart();
   toast("Замер сохранён 📏", "ok");
@@ -949,16 +967,19 @@ function renderSearchCats() {
 window.setSearchCat = function (id) {
   state.searchCat = id;
   renderSearchCats();
-  liveSearch();
+  window.liveSearch();
 };
 
 window.liveSearch = function () {
-  const q = document.getElementById("search-input").value.trim().toLowerCase();
+  const input = document.getElementById("search-input");
+  if (!input) return;
+  const q = input.value.trim().toLowerCase();
   let found = PRODUCTS;
   if (state.searchCat !== "all") found = found.filter(p => p.cat === state.searchCat);
   if (q.length >= 1) found = found.filter(p => p.name.toLowerCase().includes(q));
   if (q.length < 1 && state.searchCat === "all") {
-    document.getElementById("search-result").innerHTML = "";
+    const r = document.getElementById("search-result");
+    if (r) r.innerHTML = "";
     return;
   }
   found = found.slice(0, 30);
@@ -967,7 +988,9 @@ window.liveSearch = function () {
 };
 
 window.searchProduct = function () {
-  const q = document.getElementById("search-input").value.trim().toLowerCase();
+  const input = document.getElementById("search-input");
+  if (!input) return;
+  const q = input.value.trim().toLowerCase();
   if (!q) return toast("Введи название", "bad");
   let found = PRODUCTS;
   if (state.searchCat !== "all") found = found.filter(p => p.cat === state.searchCat);
@@ -977,6 +1000,7 @@ window.searchProduct = function () {
 
 function renderSearchResults(results, query) {
   const box = document.getElementById("search-result");
+  if (!box) return;
   if (!results.length) {
     box.innerHTML = `<div class="card"><div class="empty"><div class="big">🤔</div>
       <div>Ничего не найдено</div>
@@ -1035,21 +1059,28 @@ window.handlePhoto = function (e) {
   const r = new FileReader();
   r.onload = ev => {
     const img = document.getElementById("photo-preview");
-    img.src = ev.target.result;
-    img.classList.remove("hidden");
-    document.getElementById("photo-result").classList.remove("hidden");
-    analyzePhoto();
+    if (img) {
+      img.src = ev.target.result;
+      img.classList.remove("hidden");
+    }
+    const res = document.getElementById("photo-result");
+    if (res) res.classList.remove("hidden");
+    window.analyzePhoto();
     toast("Фото загружено! 📷", "ok");
   };
   r.readAsDataURL(f);
 };
 
 window.analyzePhoto = function () {
-  const n = document.getElementById("photo-product-select").value;
+  const sel = document.getElementById("photo-product-select");
+  if (!sel) return;
+  const n = sel.value;
   const p = PRODUCTS.find(x => x.name === n);
   if (!p) return;
   const v = getVerdict(p);
-  document.getElementById("photo-verdict").innerHTML = `
+  const box = document.getElementById("photo-verdict");
+  if (!box) return;
+  box.innerHTML = `
     <div class="card" style="margin:0">
       <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
         <div style="font-size:32px">${getCatIcon(p.cat)}</div>
@@ -1068,7 +1099,9 @@ window.analyzePhoto = function () {
 };
 
 window.searchFromAPI = async function () {
-  const q = document.getElementById("search-input").value.trim();
+  const input = document.getElementById("search-input");
+  if (!input) return;
+  const q = input.value.trim();
   if (!q) return toast("Введи название", "bad");
   toast("Ищу в интернете... 🌐");
   try {
@@ -1104,7 +1137,8 @@ function renderMealBuilder() {
 
 window.addIngredientToMeal = function () {
   const sel = document.getElementById("mb-product-select");
-  const grams = +document.getElementById("mb-grams").value || 100;
+  const gramsInput = document.getElementById("mb-grams");
+  const grams = +gramsInput?.value || 100;
   if (!sel || !sel.value) return toast("Выбери продукт", "bad");
   const p = PRODUCTS.find(x => x.name === sel.value);
   if (!p) return;
@@ -1118,7 +1152,7 @@ window.addIngredientToMeal = function () {
   });
   renderBuilderItems();
   updateBuilderTotals();
-  document.getElementById("mb-grams").value = 100;
+  if (gramsInput) gramsInput.value = 100;
   toast("Добавлено ✅", "ok");
 };
 
@@ -1157,7 +1191,8 @@ function updateBuilderTotals() {
 }
 
 window.saveCustomMeal = async function () {
-  const name = document.getElementById("mb-name").value.trim();
+  const nameInput = document.getElementById("mb-name");
+  const name = nameInput?.value.trim();
   if (!name) return toast("Введи название блюда", "bad");
   if (!state.currentMealItems.length) return toast("Добавь хотя бы один продукт", "bad");
   let cal = 0, p = 0, f = 0, c = 0;
@@ -1176,7 +1211,7 @@ window.saveCustomMeal = async function () {
     if (res.ok) meal.id = res.id;
   }
   state.currentMealItems = [];
-  document.getElementById("mb-name").value = "";
+  if (nameInput) nameInput.value = "";
   renderMealBuilder();
   toast("Блюдо сохранено! 🍽️", "ok");
   showScreen("my-meals");
@@ -1232,7 +1267,9 @@ function renderProfile() {
   const pT = { home: "Дома", street: "На улице", gym: "В зале", any: "Везде" }[u.place || "any"];
   const lT = { novice: "Новичок", middle: "Средний", pro: "Продвинутый" }[state.level];
   const email = state.fbUser?.email || "—";
-  document.getElementById("profile-info").innerHTML = `
+  const box = document.getElementById("profile-info");
+  if (!box) return;
+  box.innerHTML = `
     <div class="list-item"><div class="icon">👤</div><div class="info"><div class="title">${u.name}</div><div class="sub">${sT}, ${u.age} лет</div></div></div>
     <div class="list-item"><div class="icon">📧</div><div class="info"><div class="title">${email}</div><div class="sub">Email</div></div></div>
     <div class="list-item"><div class="icon">📏</div><div class="info"><div class="title">${u.height} см · ${u.weight} кг</div><div class="sub">Рост и вес</div></div></div>
@@ -1295,10 +1332,10 @@ function applyTheme() {
    16. АУТЕНТИФИКАЦИЯ
    ============================================================ */
 window.showAuth = function (mode) {
-  document.getElementById("auth-login").classList.toggle("hidden", mode !== "login");
-  document.getElementById("auth-register").classList.toggle("hidden", mode !== "register");
-  document.getElementById("tab-login").classList.toggle("active", mode === "login");
-  document.getElementById("tab-register").classList.toggle("active", mode === "register");
+  document.getElementById("auth-login")?.classList.toggle("hidden", mode !== "login");
+  document.getElementById("auth-register")?.classList.toggle("hidden", mode !== "register");
+  document.getElementById("tab-login")?.classList.toggle("active", mode === "login");
+  document.getElementById("tab-register")?.classList.toggle("active", mode === "register");
 };
 
 window.doRegister = async function () {
@@ -1455,7 +1492,7 @@ async function init() {
   });
 
   const si = document.getElementById("search-input");
-  if (si) si.addEventListener("keydown", e => { if (e.key === "Enter") searchProduct(); });
+  if (si) si.addEventListener("keydown", e => { if (e.key === "Enter") window.searchProduct(); });
 }
 
 window.showScreen = showScreen;
@@ -1463,4 +1500,4 @@ window.toast = toast;
 
 document.addEventListener("DOMContentLoaded", init);
 
-console.log("✅ app.js v4.0 (график + описания) загружен");
+console.log("✅ app.js v4.1 (исправлены кнопки) загружен");
